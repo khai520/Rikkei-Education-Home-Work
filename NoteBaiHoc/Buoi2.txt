@@ -1,0 +1,12 @@
+PostgreSQL 
+- mã nguồn mở -> dc đánh giá cao
+- Đặc điểm
++ Hỗ trợ ACID đầy đủ - đảm bảo tính toàn vẹn dữ liệu 
+-- Atomicity(Tính nguyên tử)
+-- Consistenscy(Tính nhất quán)
+-- Isolation(Tính độc lập)
+-- Durability(Tính bền vững)
+(Lưu trên Ram truy xuất nhanh nhất)
++ SQL chuẩn ISO - tuân thủ các tiêu chuẩn quốc tế
++ Mở rộng linh hoạt - hỗ trợ JSON, XML, GIS và nhiều kiểu dữ liệu đặc biệt
++ Hiệu quả cao - xử lý hàng triệu giao dịch mỗi giây
