@@ -1,0 +1,26 @@
+CREATE DATABASE SalesDB;
+CREATE SCHEMA sales;
+CREATE TABLE sales.Customers(
+	customer_id SERIAL PRIMARY KEY,
+	first_name varchar(50) NOT NULL,
+	last_name varchar(50) NOT NULL,
+	email varchar(50) UNIQUE NOT NULL,
+	phone varchar(10) NULL
+);
+CREATE TABLE sales.Products(
+	product_id SERIAL PRIMARY KEY,
+	product_name varchar(100) NOT NULL,
+	price decimal NOT NULL ,
+	stock_quantity int NOT NULL
+);
+CREATE TABLE sales.Orders(
+	order_id SERIAL PRIMARY KEY,
+	customer_id int REFERENCES sales.Customers(customer_id) ON DELETE CASCADE,
+	order_date Date NOT NULL
+);
+CREATE TABLE sales.OrderItems(
+	order_item_id SERIAL PRIMARY KEY,
+	order_id int REFERENCES sales.Orders(order_id) ON DELETE CASCADE,
+	product_id int REFERENCES sales.Products(product_id) ON DELETE CASCADE,
+	quantity int CHECK(quantity >= 1)
+);
