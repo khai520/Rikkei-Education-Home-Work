@@ -1,0 +1,23 @@
+CREATE DATABASE UniversityDB;
+CREATE SCHEMA university;
+CREATE TABLE university.Students(
+	student_id SERIAL PRIMARY KEY ,
+	first_name varchar(50) NOT NULL,
+	last_name varchar(50) NOT NULL,
+	birth_date DATE CHECK(birth_date <= CURRENT_DATE - INTERVAL '18 years'),
+	email varchar NOT NULL UNIQUE
+);
+CREATE TABLE university.Courses(
+	course_id SERIAL PRIMARY KEY,
+	course_name varchar(100) NOT NULL,
+	credits int 
+);
+CREATE TABLE university.Enrollments(
+	enrollment_id SERIAL PRIMARY KEY,
+	student_id int references university.Students(student_id) ON DELETE CASCADE,
+	course_id int references university.Courses(course_id) ON DELETE CASCADE,
+	enroll_date timestamp DEFAULT CURRENT_TIMESTAMP
+);
+DROP TABLE university.enrollments;
+DROP TABLE university.courses;
+DROP TABLE university.students;
