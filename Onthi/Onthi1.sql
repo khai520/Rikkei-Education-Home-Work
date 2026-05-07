@@ -1,0 +1,199 @@
+DROP TABLE Member;
+DROP TABLE Book;
+DROP TABLE Borrowing;
+DROP TABLE Staff;
+CREATE TABLE Member(
+	member_id varchar(5) PRIMARY KEY,
+	full_name varchar(100) NOT NULL,
+	email varchar(100) UNIQUE NOT NULL,
+	phone varchar(15) NULL,
+	membership_date DATE DEFAULT CURRENT_DATE
+);
+CREATE TABLE Book(
+	book_id varchar(5) PRIMARY KEY,
+	title varchar(100) NOT NULL,
+	author varchar(100) NOT NULL,
+	price DECIMAL(10,2) NOT NULL,
+	status varchar(20) NOT NULL,
+	page_count int NUll
+);
+CREATE TABLE Borrowing (
+	borrow_id SERIAL PRIMARY KEY,
+	member_id varchar(5) NOT NULL REFERENCES Member(member_id) ON DELETE CASCADE,
+	book_id varchar(5) NOT NULL REFERENCES Book(book_id) ON DELETE CASCADE,
+	borrow_date DATE NOT NULL DEFAULT CURRENT_DATE,
+	return_date DATE NULL, 
+	fine_amount DECIMAL(10,2) NOT NULL
+);
+CREATE TABLE Staff(
+	staff_id SERIAL PRIMARY KEY,
+	borrow_id int REFERENCES Borrowing(borrow_id) ON DELETE CASCADE,
+	staff_name varchar(50) NOT NULL,
+	action_date DATE NOT NULL DEFAULT CURRENT_DATE,
+	service_fee DECIMAL(10,2) NOT NULL
+);
+
+INSERT INTO Member(member_id,full_name,email,phone)
+VALUES 
+('MB001','Hoang','hoang@gmail.com','012345678'),
+('MB002','Quang','quang@gmail.com','025514555'),
+('MB003','Minh','minh@gmail.com','023456789'),
+('MB004','Thuy','thuy@gmail.com','034567891'),
+('MB005','Duong','duong@gmail.com','045678912');
+
+SELECT * FROM Member;
+
+INSERT INTO Book(book_id,title,author,price,status,page_count)
+VALUES 
+('BK001','SSS','Tri','100000', 'Available' , 200),
+('BK002','DDD','Huy','200000', 'Borrowed' , 100),
+('BK003','FFF','Phu','130000', 'Available' , 150),
+('BK004','CCC','Tho','250000', 'Borrowed' , 156),
+('BK005','WWW','Hien','120000', 'Available' , 130);
+
+SELECT * FROM Book;
+
+INSERT INTO Borrowing(member_id,book_id,return_date,fine_amount)
+VALUES 
+('MB001' , 'BK001' , NULL , 200000),
+('MB002' , 'BK002' , NULL , 100000),
+('MB003' , 'BK003' , NULL , 230000),
+('MB004' , 'BK004' , NULL , 130000),
+('MB005' , 'BK005' , NULL , 240000);
+
+SELECT * FROM Borrowing;
+
+INSERT INTO Staff(borrow_id,staff_name ,service_fee)
+VALUES 
+(1 , 'Quy', 5000000),
+(2 , 'Duy', 4000000),
+(3 , 'Loc', 4500000),
+(4 , 'Vu', 5700000),
+(5 , 'Hong', 6000000);
+
+SELECT * FROM Staff;
+
+Update Borrowing SET fine_amount = fine_amount + (fine_amount / 10) WHERE borrow_date = '5/7/2026';
+
+SELECT * FROM Borrowing;
+
+DELETE FROM Staff WHERE staff_name ILIKE '%Temporary%' AND service_fee < 200;
+
+SELECT member_id , full_name , email , membership_date FROM Member Order by membership_date DESC;
+SELECT book_id, title, author, price FROM Book Order by price ;
+SELECT m.full_name , b.title, br.borrow_date FROM Borrowing br 
+Join Member m On br.member_id = m.member_id Join Book b On b.book_id = br.book_id;
+SELECT m.full_name , SUM(s.service_fee) AS total_fine From Member m 
+JOIN borrowing br On br.member_id = m.member_id 
+JOIN staff s On s.borrow_id = br.borrow_id
+GROUP By m.full_name Order by total_fine;
+SELECT * From Member Order by full_name DESC LIMIT 3 OFFSET 2;
+SELECT m.full_name From Member m
+Join borrowing br On m.member_id = br.member_id 
+GROUP by m.full_name
+Having COUNT(DISTINCT br.member_id) > 0;
+SELECT b.title,
+COUNT(DISTINCT br.member_id) AS total_members
+FROM Book b 
+JOIN Borrowing br
+On br.book_id = b.book_id
+GROUP By b.title
+Having COUNT(DISTINCT br.member_id) >= 2;
+SELECT m.full_name , SUM(br.fine_amount) AS fine_amount FROM Member m
+JOIN Borrowing br On br.member_id = m.member_id
+GROUP BY m.full_name
+HAVING SUM(br.fine_amount) >= 200000;
+SELECT * From Member WHERE full_name ILIKE '%Anh%' OR email LIKE '%@gmail.com' ORDER BY full_name;
+SELECT * FROM Book ORDER By page_count DESC LIMIT 2 OFFSET 2;
+
+CREATE VIEW v_using AS
+SELECT b.title , m.full_name FROM Member m JOIN Borrowing br On br.member_id = m.member_id
+JOIN Book b On b.book_id = br.book_id 
+WHERE br.borrow_date > '4/7/2026';
+
+SELECT * FROM v_using;
+DROP VIEW v_using;
+
+CREATE VIEW v_page_count_150 AS
+SELECT b.title , m.full_name FROM Member m JOIN Borrowing br On br.member_id = m.member_id
+JOIN Book b On b.book_id = br.book_id 
+WHERE b.page_count > 150;
+
+SELECT * FROM v_page_count_150;
+DROP VIEW v_page_count_150;
+
+CREATE OR REPLACE FUNCTION check_borrow_date()
+RETURNS TRIGGER AS $$
+BEGIN
+	IF NEW.borrow_date > NEW.return_date THEN
+		RAISE EXCEPTION 'Ngày mượn không thể sau ngày trả!';
+	END IF;
+	RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER trg_check_borrow_date
+BEFORE INSERT OR UPDATE On Borrowing
+FOR EACH ROW
+EXECUTE FUNCTION check_borrow_date();
+
+SELECT trigger_name, event_manipulation, action_timing
+FROM information_schema.triggers
+WHERE event_object_table = 'borrowing';
+
+CREATE OR REPLACE FUNCTION update_book_status()
+RETURNS TRIGGER AS $$
+BEGIN
+	NEW.status = 'Borrowed';
+	RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER trg_update_book_status
+BEFORE INSERT ON Borrowing
+FOR EACH ROW
+EXECUTE FUNCTION update_book_status();
+
+
+CREATE OR REPLACE PROCEDURE add_new_member(
+	m_member_id VARCHAR,
+	m_full_name VARCHAR,
+	m_email VARCHAR
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN 
+	INSERT Into Member(member_id,full_name,email )
+	VALUES (m_member_id,m_full_name,m_email);
+END;
+$$;
+
+CALL add_new_member('MB006','Nga','nga@gmail.com');
+SELECT * FROM MEMBER;
+
+CREATE OR REPLACE PROCEDURE process_return(
+	p_borrow_id int,
+	p_staff_name varchar,
+	p_fee decimal
+)
+LANGUAGE plpgsql
+AS $$
+	BEGIN
+		INSERT INTO staff(borrow_id,staff_name,service_fee)
+		VALUES (p_borrow_id,p_staff_name,p_fee);
+	END;
+$$;
+
+CALL process_return(2, 'Truong' , 200000);
+SELECT * FROM Staff;
+
+CREATE OR REPLACE PROCEDURE return_book(
+	m_member_id varchar,
+	b_book_id varchar
+)
+LANGUAGE plpgsql 
+AS $$
+	BEGIN
+		UPDATE 
+	END;
+$$;
