@@ -29,3 +29,4 @@ CREATE TABLE Enrollment(
     UNIQUE(student_id, course_id)
 );
 
+DROP TABLE Enrollment, Student , Course;
