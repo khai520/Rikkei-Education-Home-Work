@@ -7,7 +7,7 @@ import java.sql.SQLException;
 public class DBUtil {
     public static final String USER_NAME = "postgres";
     public static final String PASSWORD = "123456";
-    public static final String URL = "jdbc:postgresql://localhost:5432/postgres";
+    public static final String URL = "jdbc:postgresql://localhost:5432/QLKH";
     public static Connection getConnection() {
         try {
             Class.forName("org.postgresql.Driver");
@@ -20,5 +20,14 @@ public class DBUtil {
             throw new RuntimeException(e);
         }
         return null;
+    }
+    public static void closeConnection(Connection conn) {
+        if (conn != null) {
+            try {
+                conn.close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 }
