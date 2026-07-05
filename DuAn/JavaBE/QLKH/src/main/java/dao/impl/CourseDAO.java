@@ -118,6 +118,7 @@ public class CourseDAO implements ICourseDAO {
         }
     }
 
+
     @Override
     public boolean updateCourse(Course c) {
         Connection conn = null;

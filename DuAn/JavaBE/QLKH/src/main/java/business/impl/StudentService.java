@@ -59,4 +59,9 @@ public class StudentService implements IStudentService {
         return studentDAO.deleteStudent(id);
     }
 
+    @Override
+    public boolean ktmkc(int id, String password) {
+        return studentDAO.ktmkc(id, password);
+    }
+
 }

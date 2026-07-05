@@ -15,4 +15,5 @@ public interface IStudentService {
     public boolean updatePassword(int id, String password);
     public boolean updateStudent(Student student);
     public boolean deleteStudent(int id);
+    public boolean ktmkc(int id , String password);
 }

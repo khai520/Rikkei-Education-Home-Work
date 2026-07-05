@@ -285,4 +285,23 @@ public class StudentDAO implements IStudentDAO {
             DBUtil.closeConnection(conn);
         }
     }
+
+    @Override
+    public boolean ktmkc(int id, String password) {
+        Connection conn = null;
+        try {
+            conn = DBUtil.getConnection();
+            assert conn != null;
+            PreparedStatement pstmt = conn.prepareStatement( "SELECT * FROM student WHERE email = ? AND password = ?");
+            pstmt.setInt(1, id);
+            pstmt.setString(2, BCrypt.hashpw(password, BCrypt.gensalt()));
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+        finally {
+            DBUtil.closeConnection(conn);
+        }
+    }
 }

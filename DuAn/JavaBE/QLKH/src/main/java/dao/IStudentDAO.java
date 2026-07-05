@@ -15,5 +15,6 @@ public interface IStudentDAO {
     public boolean updateStudent(Student student);
     public boolean deleteStudent(int id);
     public boolean updatePassword(int id, String password);
+    public boolean ktmkc (int id , String password);
 
 }

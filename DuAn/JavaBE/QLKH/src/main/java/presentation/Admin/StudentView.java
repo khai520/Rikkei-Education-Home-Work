@@ -64,24 +64,9 @@ public class StudentView {
         while (true) {
             System.out.println("\n===== DANH SÁCH HỌC VIÊN =====");
             List<Student> students = studentService.getAllStudents();
-            ConsoleTable.printLine(111);
-
-            System.out.printf("| %-4s | %-25s | %-12s | %-25s | %-5s | %-12s | %-8s |%n",
-                    "ID", "Họ tên", "Ngày sinh", "Email", "GT", "Điện thoại", "Role");
-
-            ConsoleTable.printLine(110);
-
-            for (Student s : students) {
-                System.out.printf("| %-4d | %-25s | %-12s | %-25s | %-5s | %-12s | %-8s |%n",
-                        s.getId(),
-                        s.getName(),
-                        s.getDob(),
-                        s.getEmail(),
-                        s.getSex() ? "Nam" : "Nữ",
-                        s.getPhone(),
-                        s.getRole());
-            }
-            ConsoleTable.printLine(111);
+            ConsoleTable.studentHeader();
+            students.forEach(ConsoleTable::studentRow);
+            ConsoleTable.Footer();
             System.out.print("Chỉnh sửa sinh viên 1.Y/0.N: ");
             int choice;
             try {
@@ -97,7 +82,7 @@ public class StudentView {
                 break;
             }
         }
-        pause();
+        ConsoleTable.pause();
     }
     private static void  listUpdateDelete() {
         while (true) {
@@ -107,7 +92,7 @@ public class StudentView {
                 if (id == 0){
                     return;
                 }
-                Student student = studentService.getStudentById(id , "STUDENT");
+                Student student = studentService.getStudentById(id , "ADMIN");
                 if (student == null) {
                     System.out.println("Sinh viên không tồn tại");
                     continue;
@@ -133,7 +118,7 @@ public class StudentView {
                         int choice2 ;
                         while (true) {
                             try {
-                                System.out.println("Bạn có chắc chắn muốn xóa sinh viên "+ id +" 1.Y/0.N/: ");
+                                System.out.print("Bạn có chắc chắn muốn xóa sinh viên "+ id +" 1.Y/0.N/: ");
                                 choice2 = Integer.parseInt(sc.nextLine());
                                 break;
                             } catch (NumberFormatException e) {
@@ -163,20 +148,24 @@ public class StudentView {
     }
     private static void addStudent() {
         System.out.println("\n===== THÊM HỌC VIÊN =====");
-        sc.nextLine();
-
-        System.out.print("Email: ");
-        String registerEmail = sc.nextLine();
         String regex = "^[\\w-.]+@[\\w-]+(\\.[\\w-]+)+$";
-        while (!registerEmail.trim().matches(regex)){
-            System.out.println("Định dạng email sai vui lòng nhập lại!");
+        String registerEmail;
+        while (true){
+            System.out.print("Email: ");
             registerEmail = sc.nextLine();
+            if (!registerEmail.trim().matches(regex)){
+                System.out.println("Định dạng email sai vui lòng nhập lại!");
+                continue;
+            }
+            if (studentService.getStudentByEmail(registerEmail , null) != null)
+            {
+                System.out.println("Email đã tạo tài khoản!");
+                continue;
+            }
+            break;
         }
 
-        if (studentService.getStudentByEmail(registerEmail , null) != null)
-        {
-            System.out.println("Email đã tạo tài khoản!");
-        }
+
 
         System.out.print("Họ và tên: ");
         String name = sc.nextLine();
@@ -248,7 +237,7 @@ public class StudentView {
 
         studentService.register(student);
 
-        pause();
+        ConsoleTable.pause();
     }
 
     private static void updateStudent(Student student) {
@@ -404,7 +393,7 @@ public class StudentView {
         else {
             System.out.println("Xóa không thành công");
         }
-        pause();
+        ConsoleTable.pause();
     }
 
     private static void searchStudent() {
@@ -431,73 +420,30 @@ public class StudentView {
                 case 1:
                     System.out.print("Nhập id muốn tìm kiếm: ");
                     int getid  = Integer.parseInt(sc.nextLine());
-                    ConsoleTable.printLine(111);
-
-                    System.out.printf("| %-4s | %-25s | %-12s | %-25s | %-5s | %-12s | %-8s |%n",
-                            "ID", "Họ tên", "Ngày sinh", "Email", "GT", "Điện thoại", "Role");
-
-                    ConsoleTable.printLine(110);
-
                     Student student = studentService.getStudentById(getid , "STUDENT");
-                    System.out.printf("| %-4d | %-25s | %-12s | %-25s | %-5s | %-12s | %-8s |%n",
-                            student.getId(),
-                            student.getName(),
-                            student.getDob(),
-                            student.getEmail(),
-                            student.getSex() ? "Nam" : "Nữ",
-                            student.getPhone(),
-                            student.getRole());
-
-                    ConsoleTable.printLine(111);
-                    pause();
+                    ConsoleTable.studentHeader();
+                    ConsoleTable.studentRow(student);
+                    ConsoleTable.Footer();
+                    ConsoleTable.pause();
                     break;
                 case 2:
                     System.out.print("Nhập tên muốn tìm kiếm: ");
                     String name  = sc.nextLine();
-                    ConsoleTable.printLine(111);
-
-                    System.out.printf("| %-4s | %-25s | %-12s | %-25s | %-5s | %-12s | %-8s |%n",
-                            "ID", "Họ tên", "Ngày sinh", "Email", "GT", "Điện thoại", "Role");
-
-                    ConsoleTable.printLine(110);
-
-                    List<Student> students = studentService.getStudentByName(name , "STUDENT");
-                    for (Student s : students) {
-                        System.out.printf("| %-4d | %-25s | %-12s | %-25s | %-5s | %-12s | %-8s |%n",
-                                s.getId(),
-                                s.getName(),
-                                s.getDob(),
-                                s.getEmail(),
-                                s.getSex() ? "Nam" : "Nữ",
-                                s.getPhone(),
-                                s.getRole());
-                    }
-
-                    ConsoleTable.printLine(111);
-                    pause();
+                    List<Student> searchname = studentService.getStudentByName(name , "STUDENT");
+                    ConsoleTable.studentHeader();
+                    searchname.forEach(ConsoleTable::studentRow);
+                    ConsoleTable.Footer();
+                    ConsoleTable.pause();
                     break;
                 case 3:
                     System.out.print("Nhập email muốn tìm kiếm: ");
                     String email  = sc.nextLine();
-                    ConsoleTable.printLine(111);
-
-                    System.out.printf("| %-4s | %-25s | %-12s | %-25s | %-5s | %-12s | %-8s |%n",
-                            "ID", "Họ tên", "Ngày sinh", "Email", "GT", "Điện thoại", "Role");
-
-                    ConsoleTable.printLine(110);
 
                     Student getEmail = studentService.getStudentByEmail(email , "STUDENT");
-                    System.out.printf("| %-4d | %-25s | %-12s | %-25s | %-5s | %-12s | %-8s |%n",
-                            getEmail.getId(),
-                            getEmail.getName(),
-                            getEmail.getDob(),
-                            getEmail.getEmail(),
-                            getEmail.getSex() ? "Nam" : "Nữ",
-                            getEmail.getPhone(),
-                            getEmail.getRole());
-
-                    ConsoleTable.printLine(111);
-                    pause();
+                    ConsoleTable.studentHeader();
+                    ConsoleTable.studentRow(getEmail);
+                    ConsoleTable.Footer();
+                    ConsoleTable.pause();
                     break;
                 case 0:
                     return;
@@ -531,76 +477,28 @@ public class StudentView {
 
             switch (choice) {
                 case 1:
-                    ConsoleTable.printLine(111);
-
-                    System.out.printf("| %-4s | %-25s | %-12s | %-25s | %-5s | %-12s | %-8s |%n",
-                            "ID", "Họ tên", "Ngày sinh", "Email", "GT", "Điện thoại", "Role");
-
-                    ConsoleTable.printLine(110);
-                    students.stream().sorted(Comparator.comparing(Student::getId)).forEach(s -> System.out.printf("| %-4d | %-25s | %-12s | %-25s | %-5s | %-12s | %-8s |%n",
-                            s.getId(),
-                            s.getName(),
-                            s.getDob(),
-                            s.getEmail(),
-                            s.getSex() ? "Nam" : "Nữ",
-                            s.getPhone(),
-                            s.getRole()));
-                    ConsoleTable.printLine(111);
-                    pause();
+                    ConsoleTable.studentHeader();
+                    students.stream().sorted(Comparator.comparing(Student::getId)).forEach(ConsoleTable::studentRow);
+                    ConsoleTable.Footer();
+                    ConsoleTable.pause();
                     break;
                 case 2:
-                    ConsoleTable.printLine(111);
-
-                    System.out.printf("| %-4s | %-25s | %-12s | %-25s | %-5s | %-12s | %-8s |%n",
-                            "ID", "Họ tên", "Ngày sinh", "Email", "GT", "Điện thoại", "Role");
-
-                    ConsoleTable.printLine(110);
-                    students.stream().sorted(Comparator.comparing(Student::getId).reversed()).forEach(s -> System.out.printf("| %-4d | %-25s | %-12s | %-25s | %-5s | %-12s | %-8s |%n",
-                            s.getId(),
-                            s.getName(),
-                            s.getDob(),
-                            s.getEmail(),
-                            s.getSex() ? "Nam" : "Nữ",
-                            s.getPhone(),
-                            s.getRole()));
-                    ConsoleTable.printLine(111);
-                    pause();
+                    ConsoleTable.studentHeader();
+                    students.stream().sorted(Comparator.comparing(Student::getId).reversed()).forEach(ConsoleTable::studentRow);
+                    ConsoleTable.Footer();
+                    ConsoleTable.pause();
                     break;
                 case 3:
-                    ConsoleTable.printLine(111);
-
-                    System.out.printf("| %-4s | %-25s | %-12s | %-25s | %-5s | %-12s | %-8s |%n",
-                            "ID", "Họ tên", "Ngày sinh", "Email", "GT", "Điện thoại", "Role");
-
-                    ConsoleTable.printLine(110);
-                    students.stream().sorted(Comparator.comparing(Student::getName)).forEach(s -> System.out.printf("| %-4d | %-25s | %-12s | %-25s | %-5s | %-12s | %-8s |%n",
-                            s.getId(),
-                            s.getName(),
-                            s.getDob(),
-                            s.getEmail(),
-                            s.getSex() ? "Nam" : "Nữ",
-                            s.getPhone(),
-                            s.getRole()));
-                    ConsoleTable.printLine(111);
-                    pause();
+                    ConsoleTable.studentHeader();
+                    students.stream().sorted(Comparator.comparing(Student::getName)).forEach(ConsoleTable::studentRow);
+                    ConsoleTable.Footer();
+                    ConsoleTable.pause();
                     break;
                 case 4:
-                    ConsoleTable.printLine(111);
-
-                    System.out.printf("| %-4s | %-25s | %-12s | %-25s | %-5s | %-12s | %-8s |%n",
-                            "ID", "Họ tên", "Ngày sinh", "Email", "GT", "Điện thoại", "Role");
-
-                    ConsoleTable.printLine(110);
-                    students.stream().sorted(Comparator.comparing(Student::getName).reversed()).forEach(s -> System.out.printf("| %-4d | %-25s | %-12s | %-25s | %-5s | %-12s | %-8s |%n",
-                            s.getId(),
-                            s.getName(),
-                            s.getDob(),
-                            s.getEmail(),
-                            s.getSex() ? "Nam" : "Nữ",
-                            s.getPhone(),
-                            s.getRole()));
-                    ConsoleTable.printLine(111);
-                    pause();
+                    ConsoleTable.studentHeader();
+                    students.stream().sorted(Comparator.comparing(Student::getName).reversed()).forEach(ConsoleTable::studentRow);
+                    ConsoleTable.Footer();
+                    ConsoleTable.pause();
                     break;
                 case 0:
                     return;
@@ -610,8 +508,4 @@ public class StudentView {
         }
     }
 
-    private static void pause() {
-        System.out.println("\nNhấn Enter để tiếp tục...");
-        sc.nextLine();
-    }
 }

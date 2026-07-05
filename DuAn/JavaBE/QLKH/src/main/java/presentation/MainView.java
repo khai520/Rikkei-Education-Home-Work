@@ -7,7 +7,6 @@ import presentation.Admin.ViewAdmin;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
-import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class MainView {
@@ -22,13 +21,13 @@ public class MainView {
             System.out.println("1. Đăng nhập");
             System.out.println("2. Đăng ký học viên");
             System.out.println("0. Thoát");
-            System.out.println("------------------------------------------------");
+            System.out.println("--------------------------------------------------");
             System.out.print("Chọn chức năng: ");
             int choice;
             try {
-                choice = sc.nextInt();
-            }catch (InputMismatchException e){
-                System.out.println("Vui lòng nhập số");
+                choice = Integer.parseInt(sc.nextLine());
+            } catch (NumberFormatException e) {
+                System.out.println("Vui lòng nhập số!");
                 continue;
             }
 
@@ -63,7 +62,7 @@ public class MainView {
         if (student != null && student.getRole() == Student.Role.ADMIN) {
             ViewAdmin.adminView();
         } else if(student != null && student.getRole() == Student.Role.STUDENT) {
-            ViewStudent.studentView();
+            ViewStudent.studentView(id);
         } else{
             System.out.println("Tên đăng nhập hoặc mật khẩu sai!");
         }
@@ -92,7 +91,7 @@ public class MainView {
                 registerPassword = sc.nextLine();
 
                 if (registerPassword.matches(regexPassword)) {
-                    int checkId = studentService.getStudentByEmail(registerEmail, "STUDENT").getId();
+                    int checkId = studentService.getStudentByEmail(registerEmail, "ADMIN").getId();
 
                     return studentService.updatePassword(checkId , registerPassword) ? "Đổi mật khẩu thành công" : "Đổi mật khẩu không thành công";
                 }

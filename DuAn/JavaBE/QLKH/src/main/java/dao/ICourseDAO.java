@@ -10,6 +10,7 @@ public interface ICourseDAO {
     public Course getCourseById(int id);
     public List<Course> getCourseByName( String name);
     public boolean addCourse(Course c);
+
     public boolean updateCourse(Course c);
     public boolean deleteCourse(int id);
 }

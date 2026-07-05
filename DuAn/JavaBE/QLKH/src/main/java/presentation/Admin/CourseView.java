@@ -29,9 +29,10 @@ public class CourseView {
 
             switch (choice) {
                 case 1:
-                    showAllStudents();
+                    showAllCourse();
                     break;
                 case 2:
+                    addCourse();
                     break;
                 case 3:
                     getCourse();
@@ -47,26 +48,15 @@ public class CourseView {
             }
         }
     }
-    private static void showAllStudents() {
+    private static void showAllCourse() {
         while (true) {
-            System.out.println("\n===== DANH SÁCH HỌC VIÊN =====");
+            System.out.println("\n===== DANH SÁCH KHÓA HỌC =====");
             List<Course> courses = courseService.getAllCourse();
-            ConsoleTable.printLine(111);
 
-            System.out.printf("| %-4s | %-25s | %-12s | %-25s | %-5s |%n",
-                    "ID", "Tên khóa học", "Giảng viên", "Thời lượng", "Ngày tạo");
+            ConsoleTable.courseHeader();
+            courses.forEach(ConsoleTable::courseRow);
+            ConsoleTable.Footer();
 
-            ConsoleTable.printLine(110);
-
-            for (Course course : courses) {
-                System.out.printf("| %-4d | %-25s | %-12s | %-25s | %-5s |%n",
-                        course.getId(),
-                        course.getName(),
-                        course.getInstruction(),
-                        course.getDuration(),
-                        course.getCreate_at());
-            }
-            ConsoleTable.printLine(111);
             System.out.print("Chỉnh sửa khóa học 1.Y/0.N: ");
             int choice;
             try {
@@ -83,8 +73,44 @@ public class CourseView {
                 break;
             }
         }
-        pause();
+        ConsoleTable.pause();
     }
+
+    private static void addCourse() {
+        System.out.print("Tên khóa học: ");
+        String name = sc.nextLine();
+        while (name == null || name.isEmpty()) {
+            System.out.println("Dữ liệu không đươc để trống");
+            name = sc.nextLine();
+        }
+
+        System.out.print("Giảng viên: ");
+        String giangvien = sc.nextLine();
+        while (giangvien == null || giangvien.isEmpty()) {
+            System.out.println("Dữ liệu không đươc để trống");
+            giangvien = sc.nextLine();
+        }
+
+        System.out.print("Thời lượng: ");
+        int thoiluong = Integer.parseInt(sc.nextLine());
+        while (thoiluong <= 0) {
+            System.out.println("Thời lượng không được = 0 hoặc bé hơn 0");
+            thoiluong = Integer.parseInt(sc.nextLine());
+        }
+        Course course = new Course();
+        course.setName(name);
+        course.setInstruction(giangvien);
+        course.setDuration(thoiluong);
+        if (courseService.addCourse(course))
+        {
+            System.out.println("Thêm thành công");
+        }
+        else {
+            System.out.println("Thêm thất bại");
+        }
+    }
+
+
     private static void  listUpdateDelete() {
         while (true) {
             try {
@@ -128,12 +154,9 @@ public class CourseView {
                         }
 
                         if (choice2 == 1) {
-                            deleteStudent(id);
+                            deleteCourse(id);
                             return;
                         }
-                        break;
-                    case 3:
-
                         break;
                     case 0:
                         return;
@@ -226,7 +249,7 @@ public class CourseView {
             }
         }
     }
-    private static void deleteStudent(int id) {
+    private static void deleteCourse(int id) {
         System.out.println("\n===== XÓA KHÓA HỌC =====");
         if (courseService.deleteCourse(id))
         {
@@ -235,7 +258,7 @@ public class CourseView {
         else {
             System.out.println("Xóa không thành công");
         }
-        pause();
+        ConsoleTable.pause();
     }
     private static void getCourse() {
 
@@ -260,46 +283,24 @@ public class CourseView {
                 case 1:
                     System.out.print("Nhập id muốn tìm kiếm: ");
                     int getid  = Integer.parseInt(sc.nextLine());
-                    ConsoleTable.printLine(111);
-
-                    System.out.printf("| %-4s | %-25s | %-12s | %-25s | %-5s | %-12s | %-8s |%n",
-                            "ID", "Họ tên", "Ngày sinh", "Email", "GT", "Điện thoại", "Role");
-
-                    ConsoleTable.printLine(110);
-
                     Course course = courseService.getCourseById(getid);
-                    System.out.printf("| %-4d | %-25s | %-12s | %-25s | %-5s |%n",
-                            course.getId(),
-                            course.getName(),
-                            course.getInstruction(),
-                            course.getDuration(),
-                            course.getCreate_at());
 
-                    ConsoleTable.printLine(111);
-                    pause();
+                    ConsoleTable.courseHeader();
+                    ConsoleTable.courseRow(course);
+                    ConsoleTable.Footer();
+
+                    ConsoleTable.pause();
                     break;
                 case 2:
                     System.out.print("Nhập tên muốn tìm kiếm: ");
                     String name  = sc.nextLine();
-                    ConsoleTable.printLine(111);
+                    List<Course> courses = courseService.getAllCourse().stream().filter(c -> c.getName().equals(name)).toList();
 
-                    System.out.printf("| %-4s | %-25s | %-12s | %-25s | %-5s | %-12s | %-8s |%n",
-                            "ID", "Họ tên", "Ngày sinh", "Email", "GT", "Điện thoại", "Role");
+                    ConsoleTable.courseHeader();
+                    courses.forEach(ConsoleTable::courseRow);
+                    ConsoleTable.Footer();
 
-                    ConsoleTable.printLine(110);
-
-                    List<Course> courses = courseService.getCourseByName(name);
-                    for (Course c : courses) {
-                        System.out.printf("| %-4d | %-25s | %-12s | %-25s | %-5s |%n",
-                                c.getId(),
-                                c.getName(),
-                                c.getInstruction(),
-                                c.getDuration(),
-                                c.getCreate_at());
-                    }
-
-                    ConsoleTable.printLine(111);
-                    pause();
+                    ConsoleTable.pause();
                     break;
                 case 0:
                     return;
@@ -333,68 +334,28 @@ public class CourseView {
 
             switch (choice) {
                 case 1:
-                    ConsoleTable.printLine(111);
-
-                    System.out.printf("| %-4s | %-25s | %-12s | %-25s | %-5s | %-12s | %-8s |%n",
-                            "ID", "Họ tên", "Ngày sinh", "Email", "GT", "Điện thoại", "Role");
-
-                    ConsoleTable.printLine(110);
-                    courses.stream().sorted(Comparator.comparing(Course::getId)).forEach(c -> System.out.printf("| %-4d | %-25s | %-12s | %-25s | %-5s |%n",
-                            c.getId(),
-                            c.getName(),
-                            c.getInstruction(),
-                            c.getDuration(),
-                            c.getCreate_at()));
-                    ConsoleTable.printLine(111);
-                    pause();
+                    ConsoleTable.courseHeader();
+                    courses.stream().sorted(Comparator.comparing(Course::getId)).forEach(ConsoleTable::courseRow);
+                    ConsoleTable.Footer();
+                    ConsoleTable.pause();
                     break;
                 case 2:
-                    ConsoleTable.printLine(111);
-
-                    System.out.printf("| %-4s | %-25s | %-12s | %-25s | %-5s | %-12s | %-8s |%n",
-                            "ID", "Họ tên", "Ngày sinh", "Email", "GT", "Điện thoại", "Role");
-
-                    ConsoleTable.printLine(110);
-                    courses.stream().sorted(Comparator.comparing(Course::getId).reversed()).forEach(c -> System.out.printf("| %-4d | %-25s | %-12s | %-25s | %-5s |%n",
-                            c.getId(),
-                            c.getName(),
-                            c.getInstruction(),
-                            c.getDuration(),
-                            c.getCreate_at()));
-                    ConsoleTable.printLine(111);
-                    pause();
+                    ConsoleTable.courseHeader();
+                    courses.stream().sorted(Comparator.comparing(Course::getId).reversed()).forEach(ConsoleTable::courseRow);
+                    ConsoleTable.Footer();
+                    ConsoleTable.pause();
                     break;
                 case 3:
-                    ConsoleTable.printLine(111);
-
-                    System.out.printf("| %-4s | %-25s | %-12s | %-25s | %-5s | %-12s | %-8s |%n",
-                            "ID", "Họ tên", "Ngày sinh", "Email", "GT", "Điện thoại", "Role");
-
-                    ConsoleTable.printLine(110);
-                    courses.stream().sorted(Comparator.comparing(Course::getName)).forEach(c -> System.out.printf("| %-4d | %-25s | %-12s | %-25s | %-5s |%n",
-                            c.getId(),
-                            c.getName(),
-                            c.getInstruction(),
-                            c.getDuration(),
-                            c.getCreate_at()));
-                    ConsoleTable.printLine(111);
-                    pause();
+                    ConsoleTable.courseHeader();
+                    courses.stream().sorted(Comparator.comparing(Course::getName)).forEach(ConsoleTable::courseRow);
+                    ConsoleTable.Footer();
+                    ConsoleTable.pause();
                     break;
                 case 4:
-                    ConsoleTable.printLine(111);
-
-                    System.out.printf("| %-4s | %-25s | %-12s | %-25s | %-5s | %-12s | %-8s |%n",
-                            "ID", "Họ tên", "Ngày sinh", "Email", "GT", "Điện thoại", "Role");
-
-                    ConsoleTable.printLine(110);
-                    courses.stream().sorted(Comparator.comparing(Course::getName).reversed()).forEach(c -> System.out.printf("| %-4d | %-25s | %-12s | %-25s | %-5s |%n",
-                            c.getId(),
-                            c.getName(),
-                            c.getInstruction(),
-                            c.getDuration(),
-                            c.getCreate_at()));
-                    ConsoleTable.printLine(111);
-                    pause();
+                    ConsoleTable.courseHeader();
+                    courses.stream().sorted(Comparator.comparing(Course::getName).reversed()).forEach(ConsoleTable::courseRow);
+                    ConsoleTable.Footer();
+                    ConsoleTable.pause();
                     break;
                 case 0:
                     return;
@@ -402,9 +363,5 @@ public class CourseView {
                     System.out.println("Lựa chọn không hợp lệ!");
             }
         }
-    }
-    private static void pause() {
-        System.out.println("\nNhấn Enter để tiếp tục...");
-        sc.nextLine();
     }
 }

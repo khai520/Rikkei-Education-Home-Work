@@ -5,12 +5,16 @@ CREATE TABLE Student(
     name varchar(100) NOT NULL ,
     dob DATE NOT NULL ,
     email varchar(100) NOT NULL UNIQUE ,
-    sex BIT NOT NULL ,
+    sex BIT(1) NOT NULL ,
     phone varchar(20) NULL ,
     role varchar(20) CHECK ( role in ('ADMIN' , 'STUDENT') ),
     password varchar(255) NULL ,
     create_at DATE default current_date
 );
+ALTER TABLE student
+    ALTER COLUMN sex TYPE BOOLEAN
+        USING (sex::int::boolean);
+
 Create TABLE Course(
     id Serial PRIMARY KEY ,
     name varchar(100) NOT NULL ,

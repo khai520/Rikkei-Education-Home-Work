@@ -10,7 +10,7 @@ public class ViewAdmin {
         while (true) {
             System.out.println("\n==================================================");
             System.out.println("          HỆ THỐNG QUẢN LÝ KHÓA HỌC");
-            System.out.println("==================================================");
+            System.out.println("====================================================");
             System.out.println("1. Quản lý khóa học");
             System.out.println("2. Quản lý học viên");
             System.out.println("3. Quản lý đăng ký khóa học");
