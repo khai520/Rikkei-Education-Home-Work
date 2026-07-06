@@ -18,7 +18,7 @@ ALTER TABLE student
 Create TABLE Course(
     id Serial PRIMARY KEY ,
     name varchar(100) NOT NULL ,
-    duration int not null ,
+    duration int not null CHECK(duration>0),
     instructor varchar(100) not null ,
     create_at date default  current_date
 );
@@ -34,19 +34,5 @@ CREATE TABLE Enrollment(
 INSERT INTO student(name, dob, email, sex, phone, role, password ,create_at)
 VALUES ('ADMIN' , '14/01/2002', 'khai5108@gmail.com', '1', '0856139465', 'ADMIN', crypt('123456', gen_salt('bf')) , '28/06/2026');
 
-CREATE OR REPLACE PROCEDURE login(
-    IN p_email varchar,
-    IN p_password varchar,
-    OUT student_id int
-)
-LANGUAGE plpgsql
-AS $$
-    BEGIN
-        Select id
-        INTO student_id
-        FROM student
-        WHERE p_email = email AND password = crypt(p_password, password);
-    end;
-$$;
-
-DROP PROCEDURE login(p_email varchar, p_password varchar, student_id int);
+DROP TABLE enrollment , student , course;
+DROP TaBLE enrollment;

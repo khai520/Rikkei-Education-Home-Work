@@ -2,11 +2,10 @@ package presentation.Admin;
 
 import business.impl.CourseService;
 import business.impl.EnrollmentService;
-import business.impl.StudentService;
-import dao.impl.EnrollmentDAO;
+
 import model.Course;
 import model.Enrollment;
-import model.dto.EnrollmentDTO;
+
 import presentation.ConsoleTable;
 
 import java.util.List;
@@ -16,7 +15,6 @@ public class EnrollmentView {
     static Scanner sc = new Scanner(System.in);
     private static final CourseService courseService = new CourseService();
     private static final EnrollmentService enrollmentService = new EnrollmentService();
-    private static final StudentService studentService = new StudentService();
     public static void enrollmentView() {
         while (true) {
             System.out.println("=== QUẢN LÝ ĐĂNG KÝ ===");
@@ -26,7 +24,13 @@ public class EnrollmentView {
 
             System.out.print("Nhập lựa chọn: ");
 
-            int choice = Integer.parseInt(sc.nextLine());
+            int choice;
+            try {
+                choice = Integer.parseInt(sc.nextLine());
+            } catch (NumberFormatException e) {
+                System.out.println("Vui lòng nhập số!");
+                continue;
+            }
 
             switch (choice) {
                 case 1:
@@ -41,17 +45,23 @@ public class EnrollmentView {
                 default:
                     System.out.println("Đang phát triển...");
             }
+            sc = new Scanner(System.in);
         }
     }
     private static void showAllCourse() {
         while (true) {
             System.out.println("\n===== DANH SÁCH KHÓA HỌC =====");
             List<Course> courses = courseService.getAllCourse();
-
-            ConsoleTable.courseHeader();
-            courses.forEach(ConsoleTable::courseRow);
-            ConsoleTable.Footer();
-
+            ConsoleTable.paginate(
+                    courses,
+                    5,
+                    ConsoleTable::courseRow,
+                    ConsoleTable::courseHeader,
+                    ConsoleTable::Footer
+            );
+            if (courses.isEmpty()) {
+                break;
+            }
             System.out.print("Xem danh sách sinh viên theo khóa học 1.Y / 0.N: ");
             int choice;
             try {
@@ -70,19 +80,29 @@ public class EnrollmentView {
         }
         ConsoleTable.pause();
     }
+    private static int id ;
     private static void  listSinhVienTheoHoc() {
+        int idkh;
+        Course course;
+        while (id == 0) {
+            System.out.print("Nhập id khóa học muốn thao tác: ");
+            idkh = Integer.parseInt(sc.nextLine()) ;
+            if (idkh == 0){
+                return;
+            }
+            while (true) {
+                course = courseService.getCourseById(idkh);
+                if (course != null) {
+                    id = course.getId();
+                    break;
+                }
+                System.out.println("Khóa học không tồn tại");
+                idkh = Integer.parseInt(sc.nextLine()) ;
+            }
+
+        }
         while (true) {
             try {
-                System.out.print("Nhập id khóa học muốn thao tác: ");
-                int id = Integer.parseInt(sc.nextLine()) ;
-                if (id == 0){
-                    return;
-                }
-                Course course = courseService.getCourseById(id);
-                if (course == null) {
-                    System.out.println("Khóa học không tồn tại");
-                    continue;
-                }
                 System.out.println("1. Hiển thị các sinh viên theo học: ");
                 System.out.println("0. Quay lại");
                 int choice ;
@@ -95,12 +115,19 @@ public class EnrollmentView {
                 }
                 switch (choice) {
                     case 1:
-                        ConsoleTable.studentHeader();
-                        enrollmentService.getStudentByCourseId(id , Enrollment.Status.CONFIRM).forEach(ConsoleTable::studentRow);
-                        ConsoleTable.Footer();
-                        deleteStudentFromCourse(id);
+                        ConsoleTable.paginate(
+                                enrollmentService.getStudentByCourseId(id , Enrollment.Status.CONFIRM),
+                                5,
+                                ConsoleTable::studentRow,
+                                ConsoleTable::studentHeader,
+                                ConsoleTable::Footer
+                        );
+                        if (!enrollmentService.getStudentByCourseId(id , Enrollment.Status.CONFIRM).isEmpty()) {
+                            deleteStudentFromCourse(id);
+                        }
                         break;
                     case 0:
+                        id = 0;
                         return;
 
                     default:
@@ -119,12 +146,16 @@ public class EnrollmentView {
         while (true) {
 
             System.out.println("\n========== DANH SÁCH ĐĂNG KÝ CHỜ DUYỆT ==========");
-
-
-            enrollmentService.getAllDTO(Enrollment.Status.WAITING)
-                    .forEach(System.out::println);
-
-            System.out.println("--------------------------------------");
+            ConsoleTable.paginate(
+                    enrollmentService.getAllDTO(Enrollment.Status.WAITING),
+                    5,
+                    ConsoleTable::enrollmentRow,
+                    ConsoleTable::enrollmentHeader,
+                    ConsoleTable::Footer
+            );
+            if (enrollmentService.getAllDTO(Enrollment.Status.WAITING).isEmpty()) {
+                break;
+            }
             System.out.println("1. Duyệt đăng ký");
             System.out.println("2. Từ chối đăng ký");
             System.out.println("0. Quay lại");
@@ -155,6 +186,7 @@ public class EnrollmentView {
                     System.out.println("Lựa chọn không hợp lệ!");
             }
         }
+        ConsoleTable.pause();
     }
     private static void approveEnrollment() {
 
@@ -164,7 +196,7 @@ public class EnrollmentView {
 
         try {
             enrollmentId = Integer.parseInt(sc.nextLine());
-            if (enrollmentService.checkId(enrollmentId , Enrollment.Status.WAITING)) {
+            if (!enrollmentService.checkId(enrollmentId , Enrollment.Status.WAITING)) {
                 System.out.println("Id không tồn tại");
                 return;
             }
@@ -187,7 +219,7 @@ public class EnrollmentView {
 
         try {
             enrollmentId = Integer.parseInt(sc.nextLine());
-            if (enrollmentService.checkId(enrollmentId , Enrollment.Status.WAITING)) {
+            if (!enrollmentService.checkId(enrollmentId , Enrollment.Status.WAITING)) {
                 System.out.println("Id không tồn tại");
                 return;
             }
@@ -210,8 +242,11 @@ public class EnrollmentView {
 
             try {
                 studentId = Integer.parseInt(sc.nextLine());
-                if (enrollmentService.checkIC(studentId ,courseId , Enrollment.Status.CONFIRM)) {
-                    System.out.println("Id không tồn tại");
+                if (studentId == 0) {
+                    return;
+                }
+                if (!enrollmentService.checkIC(studentId ,courseId , Enrollment.Status.CONFIRM)) {
+                    System.out.println("Học viên không thuộc khóa học này.");
                     continue;
                 }
             } catch (NumberFormatException e) {
@@ -219,9 +254,7 @@ public class EnrollmentView {
                 continue;
             }
 
-            if (studentId == 0) {
-                return;
-            }
+
 
             while (true) {
 

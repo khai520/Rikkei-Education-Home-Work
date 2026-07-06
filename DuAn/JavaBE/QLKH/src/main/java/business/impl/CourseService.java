@@ -2,12 +2,15 @@ package business.impl;
 
 import business.ICourseService;
 import dao.impl.CourseDAO;
+import dao.impl.EnrollmentDAO;
 import model.Course;
+import model.Enrollment;
 
 import java.util.List;
 
 public class CourseService implements ICourseService {
     private final CourseDAO courseDAO = new CourseDAO();
+    private final EnrollmentDAO enrollmentDAO = new EnrollmentDAO();
     @Override
     public List<Course> getAllCourse() {
         return courseDAO.getAllCourses();
@@ -35,6 +38,10 @@ public class CourseService implements ICourseService {
 
     @Override
     public boolean deleteCourse(int id) {
+        if(enrollmentDAO.existCourse(id )){
+            System.out.println("Khóa học đang có học viên.");
+            return false;
+        }
         return courseDAO.deleteCourse(id);
     }
 }

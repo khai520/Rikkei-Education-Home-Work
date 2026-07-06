@@ -12,21 +12,20 @@ import java.util.stream.Collectors;
 import java.util.Scanner;
 
 public class StatisticView {
-    private static final Scanner sc = new Scanner(System.in);
+    private static Scanner sc = new Scanner(System.in);
     private static final StudentService studentService = new StudentService();
     private static final CourseService courseService = new CourseService();
     private static final EnrollmentService enrollmentService = new EnrollmentService();
     public static void statisticView() {
 
         while (true) {
-
-            System.out.println("\n========== THỐNG KÊ ==========");
+            System.out.println("========== THỐNG KÊ ==========");
             System.out.println("1. Thống kê tổng số khóa học và học viên");
             System.out.println("2. Thống kê tổng số học viên theo từng khóa");
             System.out.println("3. Top 5 khóa học đông học viên nhất");
             System.out.println("4. Liệt kê khóa học có trên 10 học viên");
             System.out.println("0. Quay lại");
-
+            System.out.print("Nhập chương trình: ");
             int choice;
 
             try {
@@ -60,6 +59,7 @@ public class StatisticView {
                 default:
                     System.out.println("Lựa chọn không hợp lệ!");
             }
+            sc = new Scanner(System.in);
         }
     }
     private static void totalStatistic() {
@@ -86,7 +86,7 @@ public class StatisticView {
                         Collectors.counting()
                 ));
 
-        System.out.println("\n========== THỐNG KÊ ==========");
+        System.out.println("======================= THỐNG KÊ ===========================");
 
         ConsoleTable.courseStatisticHeader();
 
@@ -97,10 +97,9 @@ public class StatisticView {
                         total
                 ));
 
-        ConsoleTable.Footer();
+        ConsoleTable.printLine(60);
 
-        System.out.println("\nNhấn Enter để quay lại...");
-        sc.nextLine();
+        ConsoleTable.pause();
     }
     private static void top5Course() {
 
@@ -111,7 +110,7 @@ public class StatisticView {
                         Collectors.counting()
                 ));
 
-        System.out.println("\n========== TOP 5 ==========");
+        System.out.println("========================= TOP 5 ==============================");
 
         ConsoleTable.courseStatisticHeader();
 
@@ -129,10 +128,11 @@ public class StatisticView {
                                 totalStudent.getOrDefault(course.getName(), 0L)
                         ));
 
-        ConsoleTable.Footer();
+        ConsoleTable.printLine(60);
         ConsoleTable.pause();
     }
     private static void over10Student() {
+        System.out.println("==================== CÓ TRÊN 10 HỌC VIÊN =====================");
 
         Map<String, Long> totalStudent = enrollmentService.getAllDTO(Enrollment.Status.CONFIRM)
                 .stream()
@@ -144,7 +144,7 @@ public class StatisticView {
         ConsoleTable.courseStatisticHeader();
 
         courseService.getAllCourse().stream()
-                .filter(course -> totalStudent.getOrDefault(course.getName(), 0L) > 10)
+                .filter(course -> totalStudent.getOrDefault(course.getName(), 0L) >= 10)
                 .forEach(course ->
                         ConsoleTable.courseStatisticRow(
                                 course.getId(),
@@ -152,7 +152,7 @@ public class StatisticView {
                                 totalStudent.getOrDefault(course.getName(), 0L)
                         ));
 
-        ConsoleTable.Footer();
+        ConsoleTable.printLine(60);
 
         ConsoleTable.pause();
     }

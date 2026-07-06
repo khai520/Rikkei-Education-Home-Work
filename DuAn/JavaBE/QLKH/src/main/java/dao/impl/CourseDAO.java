@@ -15,13 +15,15 @@ public class CourseDAO implements ICourseDAO {
         c.setId(rs.getInt("id"));
         c.setName(rs.getString("name"));
         c.setDuration(rs.getInt("duration"));
-        c.setInstruction(rs.getString("instruction"));
+        c.setInstructor(rs.getString("instructor"));
         c.setCreate_at(rs.getDate("create_at").toLocalDate());
     }
 
     @Override
     public List<Course> getAllCourses() {
         Connection conn = null;
+        ResultSet rs = null;
+        PreparedStatement pstmt = null;
         List<Course> courses = new ArrayList<>();
         try {
             conn = DBUtil.getConnection();
@@ -29,8 +31,8 @@ public class CourseDAO implements ICourseDAO {
             if (conn == null) {
                 throw new RuntimeException("Không kết nối được database");
             }
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sql);
+            pstmt  = conn.prepareStatement(sql);
+            rs = pstmt.executeQuery();
             while (rs.next()) {
                 Course c = new Course();
                 setobj(rs, c);
@@ -42,19 +44,21 @@ public class CourseDAO implements ICourseDAO {
             return courses;
         }
         finally {
-            DBUtil.closeConnection(conn);
+            DBUtil.closeConnection(conn , rs, pstmt);
         }
     }
 
     @Override
     public Course getCourseById(int id) {
         Connection conn = null;
+        ResultSet rs = null;
+        PreparedStatement pstmt = null;
         try {
             conn = DBUtil.getConnection();
             assert conn != null;
-            PreparedStatement pstmt = conn.prepareStatement( "SELECT * FROM course WHERE id = ?");
+            pstmt = conn.prepareStatement( "SELECT * FROM course WHERE id = ?");
             pstmt.setInt(1, id);
-            ResultSet rs = pstmt.executeQuery();
+            rs = pstmt.executeQuery();
             Course c = new Course();
             if (rs.next()) {
                 setobj(rs, c);
@@ -66,20 +70,22 @@ public class CourseDAO implements ICourseDAO {
             return null;
         }
         finally {
-            DBUtil.closeConnection(conn);
+            DBUtil.closeConnection(conn , rs, pstmt);
         }
     }
 
     @Override
     public List<Course> getCourseByName(String name) {
         Connection conn = null;
+        ResultSet rs = null;
+        PreparedStatement pstmt = null;
         List<Course> courses = new ArrayList<>();
         try {
             conn = DBUtil.getConnection();
             assert conn != null;
-            PreparedStatement pstmt = conn.prepareStatement( "SELECT * FROM course WHERE name ILIKE ? ");
+            pstmt = conn.prepareStatement( "SELECT * FROM course WHERE name ILIKE ? ");
             pstmt.setString(1, "%" + name + "%");
-            ResultSet rs = pstmt.executeQuery();
+            rs = pstmt.executeQuery();
             while (rs.next()) {
                 Course c = new Course();
                 setobj(rs, c);
@@ -91,30 +97,29 @@ public class CourseDAO implements ICourseDAO {
             return courses;
         }
         finally {
-            DBUtil.closeConnection(conn);
+            DBUtil.closeConnection(conn , rs, pstmt);
         }
     }
 
     @Override
     public boolean addCourse(Course c) {
         Connection conn = null;
+        PreparedStatement pstmt = null;
         try {
             conn = DBUtil.getConnection();
             assert conn != null;
-            PreparedStatement  pstmt = conn.prepareStatement(
-                    "INSERT INTO course(name, duration, instruction) VALUES (?, ?, ?) )" +
-                            "VALUES (?, ?, ?, ?, ?, ?, ?)");
+            pstmt = conn.prepareStatement(
+                    "INSERT INTO course(name, duration, instructor) VALUES (?, ?, ?)");
             pstmt.setString(1, c.getName());
             pstmt.setInt(2, c.getDuration());
-            pstmt.setString(3, c.getInstruction());
-            int rs = pstmt.executeUpdate();
-            return rs > 0;
+            pstmt.setString(3, c.getInstructor());
+            return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
         finally {
-            DBUtil.closeConnection(conn);
+            DBUtil.closeConnection(conn , null, pstmt);
         }
     }
 
@@ -122,14 +127,15 @@ public class CourseDAO implements ICourseDAO {
     @Override
     public boolean updateCourse(Course c) {
         Connection conn = null;
+        PreparedStatement pstmt = null;
         try {
             conn = DBUtil.getConnection();
             assert conn != null;
-            PreparedStatement  pstmt = conn.prepareStatement(
-                    "UPDATE course SET name = ?, duration = ?, instruction = ? WHERE id = ?");
+            pstmt = conn.prepareStatement(
+                    "UPDATE course SET name = ?, duration = ?, instructor = ? WHERE id = ?");
             pstmt.setString(1, c.getName());
             pstmt.setInt(2, c.getDuration());
-            pstmt.setString(3, c.getInstruction());
+            pstmt.setString(3, c.getInstructor());
             pstmt.setInt(4, c.getId());
             int rs = pstmt.executeUpdate();
             return rs > 0;
@@ -138,27 +144,29 @@ public class CourseDAO implements ICourseDAO {
             return false;
         }
         finally {
-            DBUtil.closeConnection(conn);
+            DBUtil.closeConnection(conn , null, pstmt);
         }
     }
 
     @Override
     public boolean deleteCourse(int id) {
         Connection conn = null;
+        PreparedStatement pstmt = null;
         try {
             conn = DBUtil.getConnection();
             assert conn != null;
-            PreparedStatement  pstmt = conn.prepareStatement(
+             pstmt = conn.prepareStatement(
                     "DELETE FROM course WHERE id = ?");
             pstmt.setInt(1, id);
             int rs = pstmt.executeUpdate();
+
             return rs > 0;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
         finally {
-            DBUtil.closeConnection(conn);
+            DBUtil.closeConnection(conn , null, pstmt);
         }
     }
 }

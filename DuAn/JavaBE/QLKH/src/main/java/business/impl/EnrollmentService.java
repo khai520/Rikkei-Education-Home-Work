@@ -10,6 +10,9 @@ import model.dto.EnrollmentDTO;
 
 import java.util.List;
 
+import static model.Enrollment.Status.CANCEL;
+import static model.Enrollment.Status.CONFIRM;
+
 public class EnrollmentService implements IEnrollmentService {
     private final EnrollmentDAO enrollmentDAO = new EnrollmentDAO();
     @Override
@@ -30,6 +33,11 @@ public class EnrollmentService implements IEnrollmentService {
     @Override
     public List<Enrollment> getAll(Enrollment.Status status) {
         return enrollmentDAO.getAll(status);
+    }
+
+    @Override
+    public boolean existCourse(int id) {
+        return enrollmentDAO.existCourse(id);
     }
 
     @Override

@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Scanner;
 
 public class StudentView {
-    private static final Scanner sc = new Scanner(System.in);
+    private static Scanner sc = new Scanner(System.in);
     private static final StudentService studentService = new StudentService();
     public static void studentView() {
         while (true) {
@@ -58,15 +58,23 @@ public class StudentView {
                 default:
                     System.out.println("Lựa chọn không hợp lệ!");
             }
+            sc = new Scanner(System.in);
         }
     }
     private static void showAllStudents() {
         while (true) {
             System.out.println("\n===== DANH SÁCH HỌC VIÊN =====");
             List<Student> students = studentService.getAllStudents();
-            ConsoleTable.studentHeader();
-            students.forEach(ConsoleTable::studentRow);
-            ConsoleTable.Footer();
+            ConsoleTable.paginate(
+                    students,
+                    5,
+                    ConsoleTable::studentRow,
+                    ConsoleTable::studentHeader,
+                    ConsoleTable::Footer
+            );
+            if (students.isEmpty()) {
+                break;
+            }
             System.out.print("Chỉnh sửa sinh viên 1.Y/0.N: ");
             int choice;
             try {
@@ -84,19 +92,28 @@ public class StudentView {
         }
         ConsoleTable.pause();
     }
+    public static int id;
     private static void  listUpdateDelete() {
+        int idsv;
+        Student student = new Student();
+        while (id == 0) {
+            System.out.print("Nhập id học viên muốn thao tac: ");
+            idsv = Integer.parseInt(sc.nextLine()) ;
+            if (idsv == 0){
+                return;
+            }
+            while (true) {
+                student = studentService.getStudentById(idsv , "ADMIN");
+                if (student != null) {
+                    id = student.getId();
+                    break;
+                }
+                System.out.println("Sinh viên không tồn tại");
+                idsv = Integer.parseInt(sc.nextLine()) ;
+            }
+        }
         while (true) {
             try {
-                System.out.print("Nhập id học viên muốn thao tac: ");
-                int id = Integer.parseInt(sc.nextLine()) ;
-                if (id == 0){
-                    return;
-                }
-                Student student = studentService.getStudentById(id , "ADMIN");
-                if (student == null) {
-                    System.out.println("Sinh viên không tồn tại");
-                    continue;
-                }
                 System.out.println("1. Chỉnh sửa sinh viên");
                 System.out.println("2. Xóa sinh viên");
                 System.out.println("0. Quay lại");
@@ -133,6 +150,7 @@ public class StudentView {
                         break;
 
                     case 0:
+                        id = 0;
                         return;
 
                     default:
@@ -330,7 +348,7 @@ public class StudentView {
                         System.out.println("Sửa không thành công");
                     }
                     break;
-                case 5:
+                case 4:
                     String phone;
 
                     while (true) {
@@ -351,7 +369,7 @@ public class StudentView {
                         System.out.println("Sửa không thành công");
                     }
                     break;
-                case 7:
+                case 5:
                     String regexPassword =
                             "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@#$!%]).{8,}$";
 
@@ -420,28 +438,36 @@ public class StudentView {
                 case 1:
                     System.out.print("Nhập id muốn tìm kiếm: ");
                     int getid  = Integer.parseInt(sc.nextLine());
-                    Student student = studentService.getStudentById(getid , "STUDENT");
+                    Student student = studentService.getStudentById(getid , "ADMIN");
                     ConsoleTable.studentHeader();
-                    ConsoleTable.studentRow(student);
+                    if (student != null){
+                        ConsoleTable.studentRow(student);
+                    }
                     ConsoleTable.Footer();
                     ConsoleTable.pause();
                     break;
                 case 2:
                     System.out.print("Nhập tên muốn tìm kiếm: ");
                     String name  = sc.nextLine();
-                    List<Student> searchname = studentService.getStudentByName(name , "STUDENT");
-                    ConsoleTable.studentHeader();
-                    searchname.forEach(ConsoleTable::studentRow);
-                    ConsoleTable.Footer();
+                    List<Student> searchname = studentService.getStudentByName(name , "ADMIN");
+                    ConsoleTable.paginate(
+                            searchname,
+                            5,
+                            ConsoleTable::studentRow,
+                            ConsoleTable::studentHeader,
+                            ConsoleTable::Footer
+                    );
                     ConsoleTable.pause();
                     break;
                 case 3:
                     System.out.print("Nhập email muốn tìm kiếm: ");
                     String email  = sc.nextLine();
 
-                    Student getEmail = studentService.getStudentByEmail(email , "STUDENT");
+                    Student getEmail = studentService.getStudentByEmail(email , "ADMIN");
                     ConsoleTable.studentHeader();
-                    ConsoleTable.studentRow(getEmail);
+                    if(getEmail != null){
+                        ConsoleTable.studentRow(getEmail);
+                    }
                     ConsoleTable.Footer();
                     ConsoleTable.pause();
                     break;
@@ -477,27 +503,43 @@ public class StudentView {
 
             switch (choice) {
                 case 1:
-                    ConsoleTable.studentHeader();
-                    students.stream().sorted(Comparator.comparing(Student::getId)).forEach(ConsoleTable::studentRow);
-                    ConsoleTable.Footer();
+                    ConsoleTable.paginate(
+                            students.stream().sorted(Comparator.comparing(Student::getId)).toList(),
+                            5,
+                            ConsoleTable::studentRow,
+                            ConsoleTable::studentHeader,
+                            ConsoleTable::Footer
+                    );
                     ConsoleTable.pause();
                     break;
                 case 2:
-                    ConsoleTable.studentHeader();
-                    students.stream().sorted(Comparator.comparing(Student::getId).reversed()).forEach(ConsoleTable::studentRow);
-                    ConsoleTable.Footer();
+                    ConsoleTable.paginate(
+                            students.stream().sorted(Comparator.comparing(Student::getId).reversed()).toList(),
+                            5,
+                            ConsoleTable::studentRow,
+                            ConsoleTable::studentHeader,
+                            ConsoleTable::Footer
+                    );
                     ConsoleTable.pause();
                     break;
                 case 3:
-                    ConsoleTable.studentHeader();
-                    students.stream().sorted(Comparator.comparing(Student::getName)).forEach(ConsoleTable::studentRow);
-                    ConsoleTable.Footer();
+                    ConsoleTable.paginate(
+                            students.stream().sorted(Comparator.comparing(Student::getName)).toList(),
+                            5,
+                            ConsoleTable::studentRow,
+                            ConsoleTable::studentHeader,
+                            ConsoleTable::Footer
+                    );
                     ConsoleTable.pause();
                     break;
                 case 4:
-                    ConsoleTable.studentHeader();
-                    students.stream().sorted(Comparator.comparing(Student::getName).reversed()).forEach(ConsoleTable::studentRow);
-                    ConsoleTable.Footer();
+                    ConsoleTable.paginate(
+                            students.stream().sorted(Comparator.comparing(Student::getName).reversed()).toList(),
+                            5,
+                            ConsoleTable::studentRow,
+                            ConsoleTable::studentHeader,
+                            ConsoleTable::Footer
+                    );
                     ConsoleTable.pause();
                     break;
                 case 0:

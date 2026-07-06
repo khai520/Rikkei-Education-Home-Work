@@ -6,18 +6,18 @@ public class Course {
     private int id;
     private String name;
     private int duration;
-    private String instruction;
+    private String instructor;
     private LocalDate create_at;
 
     public Course() {
 
     }
 
-    public Course(int id, String name, int duration, String instruction, LocalDate create_at) {
+    public Course(int id, String name, int duration, String instructor, LocalDate create_at) {
         this.id = id;
         this.name = name;
         this.duration = duration;
-        this.instruction = instruction;
+        this.instructor = instructor;
         this.create_at = create_at;
     }
     public int getId() {
@@ -38,11 +38,11 @@ public class Course {
     public void setDuration(int duration) {
         this.duration = duration;
     }
-    public String getInstruction() {
-        return instruction;
+    public String getInstructor() {
+        return instructor;
     }
-    public void setInstruction(String instruction) {
-        this.instruction = instruction;
+    public void setInstructor(String instructor) {
+        this.instructor = instructor;
     }
     public LocalDate getCreate_at() {
         return create_at;
@@ -52,6 +52,6 @@ public class Course {
     }
     @Override
     public String toString() {
-        return "Course [id =" + id + ", name =" + name  + ", duration=" + duration + ", instruction=" + instruction + ", create_at=" + create_at + "]";
+        return "Course [id =" + id + ", name =" + name  + ", duration=" + duration + ", instruction=" + instructor + ", create_at=" + create_at + "]";
     }
 }

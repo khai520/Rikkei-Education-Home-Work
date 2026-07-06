@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Scanner;
 
 public class CourseView {
-    private static final Scanner sc = new Scanner(System.in);
+    private static Scanner sc = new Scanner(System.in);
     private static final CourseService courseService = new CourseService();
     public static void courseView() {
 
@@ -24,8 +24,14 @@ public class CourseView {
             System.out.println("0. Quay lại");
 
             System.out.print("Nhập lựa chọn: ");
+            int choice ;
+            try {
+                choice = Integer.parseInt(sc.nextLine());
+            } catch (NumberFormatException e) {
+                System.out.println("Vui lòng nhập số!");
+                continue;
+            }
 
-            int choice = Integer.parseInt(sc.nextLine());
 
             switch (choice) {
                 case 1:
@@ -46,6 +52,7 @@ public class CourseView {
                 default:
                     System.out.println("Đang phát triển...");
             }
+            sc = new Scanner(System.in);
         }
     }
     private static void showAllCourse() {
@@ -53,10 +60,16 @@ public class CourseView {
             System.out.println("\n===== DANH SÁCH KHÓA HỌC =====");
             List<Course> courses = courseService.getAllCourse();
 
-            ConsoleTable.courseHeader();
-            courses.forEach(ConsoleTable::courseRow);
-            ConsoleTable.Footer();
-
+            ConsoleTable.paginate(
+                    courses,
+                    5,
+                    ConsoleTable::courseRow,
+                    ConsoleTable::courseHeader,
+                    ConsoleTable::Footer
+            );
+            if (courses.isEmpty()) {
+                break;
+            }
             System.out.print("Chỉnh sửa khóa học 1.Y/0.N: ");
             int choice;
             try {
@@ -68,8 +81,7 @@ public class CourseView {
             if (choice == 1) {
                 listUpdateDelete();
             }
-            else
-            {
+            else {
                 break;
             }
         }
@@ -99,7 +111,7 @@ public class CourseView {
         }
         Course course = new Course();
         course.setName(name);
-        course.setInstruction(giangvien);
+        course.setInstructor(giangvien);
         course.setDuration(thoiluong);
         if (courseService.addCourse(course))
         {
@@ -110,20 +122,29 @@ public class CourseView {
         }
     }
 
-
+    public static int id;
     private static void  listUpdateDelete() {
+        int idkh;
+        Course course = new Course();
+        while (id == 0) {
+            System.out.print("Nhập id khóa học muốn thao tác: ");
+            idkh = Integer.parseInt(sc.nextLine()) ;
+            if (idkh == 0){
+                return;
+            }
+            while (true) {
+                course = courseService.getCourseById(idkh);
+                if (course != null) {
+                    id = course.getId();
+                    break;
+                }
+                System.out.println("Khóa học không tồn tại");
+                idkh = Integer.parseInt(sc.nextLine()) ;
+            }
+
+        }
         while (true) {
             try {
-                System.out.print("Nhập id khóa học muốn thao tác: ");
-                int id = Integer.parseInt(sc.nextLine()) ;
-                if (id == 0){
-                    return;
-                }
-                Course course = courseService.getCourseById(id);
-                if (course == null) {
-                    System.out.println("Khóa học không tồn tại");
-                    continue;
-                }
                 System.out.println("1. Chỉnh sửa khóa học");
                 System.out.println("2. Xóa khóa học");
                 System.out.println("0. Quay lại");
@@ -138,14 +159,13 @@ public class CourseView {
                 switch (choice) {
                     case 1:
                         updateCourse(course);
-                        System.out.println("Cập nhật thành công");
                         break;
 
                     case 2:
                         int choice2 ;
                         while (true) {
                             try {
-                                System.out.println("Bạn có chắc chắn muốn xóa khóa học "+ id +" 1.Y/0.N/: ");
+                                System.out.print("Bạn có chắc chắn muốn xóa khóa học "+ id +" 1.Y/0.N/: ");
                                 choice2 = Integer.parseInt(sc.nextLine());
                                 break;
                             } catch (NumberFormatException e) {
@@ -155,10 +175,12 @@ public class CourseView {
 
                         if (choice2 == 1) {
                             deleteCourse(id);
+                            id = 0;
                             return;
                         }
                         break;
                     case 0:
+                        id = 0;
                         return;
 
                     default:
@@ -166,7 +188,6 @@ public class CourseView {
                         break;
 
                 }
-
             }catch (NumberFormatException e) {
                 System.out.println("Nhập sai dữ liệu");
             }
@@ -214,7 +235,7 @@ public class CourseView {
                         System.out.println("Dữ liệu không đươc để trống");
                         giangvien = sc.nextLine();
                     }
-                    course.setInstruction(giangvien);
+                    course.setInstructor(giangvien);
                     if (courseService.updateCourse(course)){
                         System.out.println("Sửa thành công");
                     }else
@@ -230,8 +251,8 @@ public class CourseView {
                         while (thoiluong <= 0) {
                             System.out.println("Thời lượng không được dưới 0");
                             thoiluong = Integer.parseInt(sc.nextLine());
-                            course.setDuration(thoiluong);
                         }
+                        course.setDuration(thoiluong);
                     }catch (NumberFormatException e) {
                         System.out.println("Vui lòng nhập số");
                     }
@@ -284,21 +305,25 @@ public class CourseView {
                     System.out.print("Nhập id muốn tìm kiếm: ");
                     int getid  = Integer.parseInt(sc.nextLine());
                     Course course = courseService.getCourseById(getid);
-
                     ConsoleTable.courseHeader();
-                    ConsoleTable.courseRow(course);
+                    if (course != null) {
+                        ConsoleTable.courseRow(course);
+                    }
                     ConsoleTable.Footer();
-
                     ConsoleTable.pause();
                     break;
                 case 2:
                     System.out.print("Nhập tên muốn tìm kiếm: ");
                     String name  = sc.nextLine();
-                    List<Course> courses = courseService.getAllCourse().stream().filter(c -> c.getName().equals(name)).toList();
+                    List<Course> courses = courseService.getAllCourse().stream().filter(c -> c.getName().toLowerCase().contains(name.toLowerCase())).toList();
 
-                    ConsoleTable.courseHeader();
-                    courses.forEach(ConsoleTable::courseRow);
-                    ConsoleTable.Footer();
+                    ConsoleTable.paginate(
+                            courses,
+                            5,
+                            ConsoleTable::courseRow,
+                            ConsoleTable::courseHeader,
+                            ConsoleTable::Footer
+                    );
 
                     ConsoleTable.pause();
                     break;
@@ -334,27 +359,42 @@ public class CourseView {
 
             switch (choice) {
                 case 1:
-                    ConsoleTable.courseHeader();
-                    courses.stream().sorted(Comparator.comparing(Course::getId)).forEach(ConsoleTable::courseRow);
-                    ConsoleTable.Footer();
+
+                    ConsoleTable.paginate(
+                            courses.stream().sorted(Comparator.comparing(Course::getId)).toList(),
+                            5,
+                            ConsoleTable::courseRow,
+                            ConsoleTable::courseHeader,
+                            ConsoleTable::Footer);
+
                     ConsoleTable.pause();
                     break;
                 case 2:
-                    ConsoleTable.courseHeader();
-                    courses.stream().sorted(Comparator.comparing(Course::getId).reversed()).forEach(ConsoleTable::courseRow);
-                    ConsoleTable.Footer();
+                    ConsoleTable.paginate(
+                            courses.stream().sorted(Comparator.comparing(Course::getId).reversed()).toList(),
+                            5,
+                            ConsoleTable::courseRow,
+                            ConsoleTable::courseHeader,
+                            ConsoleTable::Footer);
+
                     ConsoleTable.pause();
                     break;
                 case 3:
-                    ConsoleTable.courseHeader();
-                    courses.stream().sorted(Comparator.comparing(Course::getName)).forEach(ConsoleTable::courseRow);
-                    ConsoleTable.Footer();
+                    ConsoleTable.paginate(
+                            courses.stream().sorted(Comparator.comparing(Course::getName)).toList(),
+                            5,
+                            ConsoleTable::courseRow,
+                            ConsoleTable::courseHeader,
+                            ConsoleTable::Footer);
                     ConsoleTable.pause();
                     break;
                 case 4:
-                    ConsoleTable.courseHeader();
-                    courses.stream().sorted(Comparator.comparing(Course::getName).reversed()).forEach(ConsoleTable::courseRow);
-                    ConsoleTable.Footer();
+                    ConsoleTable.paginate(
+                            courses.stream().sorted(Comparator.comparing(Course::getName).reversed()).toList(),
+                            5,
+                            ConsoleTable::courseRow,
+                            ConsoleTable::courseHeader,
+                            ConsoleTable::Footer);
                     ConsoleTable.pause();
                     break;
                 case 0:

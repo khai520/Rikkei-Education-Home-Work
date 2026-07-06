@@ -14,7 +14,6 @@ public class MainView {
     static StudentService studentService = new StudentService();
     public static void mainView() {
         while (true) {
-            System.out.println();
             System.out.println("==================================================");
             System.out.println("             COURSE MANAGEMENT SYSTEM");
             System.out.println("==================================================");
@@ -46,36 +45,59 @@ public class MainView {
                 default:
                     System.out.println("Lựa chọn không hợp lệ!");
             }
+            sc = new Scanner(System.in);
         }
-
     }
     private static void loginView() {
         System.out.println("\n================== ĐĂNG NHẬP ===================");
         System.out.print("Email: ");
-        String email = sc.next();
+        String email = sc.nextLine();
+        while (email == null || email.isEmpty()) {
+            System.out.println("Dữ liệu không đươc để trống");
+            System.out.print("Email: ");
+            email = sc.nextLine();
+        }
         System.out.print("Mật khẩu: ");
-        String password = sc.next();
+        String password = sc.nextLine();
+        while (password == null || password.isEmpty()) {
+            System.out.println("Dữ liệu không đươc để trống");
+            System.out.print("Mật khẩu: ");
+            password = sc.nextLine();
+        }
         int id = studentService.login(email, password);
 
         Student student = studentService.getStudentById(id , null);
 
-        if (student != null && student.getRole() == Student.Role.ADMIN) {
-            ViewAdmin.adminView();
-        } else if(student != null && student.getRole() == Student.Role.STUDENT) {
-            ViewStudent.studentView(id);
-        } else{
-            System.out.println("Tên đăng nhập hoặc mật khẩu sai!");
+        if (student != null) {
+
+            if (student.getRole()==Student.Role.ADMIN) {
+
+                ViewAdmin.adminView();
+
+                return;
+            }
+
+            if(student.getRole()==Student.Role.STUDENT) {
+
+                ViewStudent.studentView(id);
+
+                return;
+            }
+
         }
+
+        System.out.println("Sai tài khoản");
     }
     private static String registerView() {
         System.out.println("\n============== ĐĂNG KÝ TÀI KHOẢN ===============");
-        sc.nextLine();
 
         System.out.print("Email: ");
         String registerEmail = sc.nextLine();
         String regex = "^[\\w-.]+@[\\w-]+(\\.[\\w-]+)+$";
+
         while (!registerEmail.trim().matches(regex)){
             System.out.println("Định dạng email sai vui lòng nhập lại!");
+            System.out.print("Email: ");
             registerEmail = sc.nextLine();
         }
 
@@ -87,16 +109,28 @@ public class MainView {
             String registerPassword;
 
             while (true) {
-                System.out.print("Mật khẩu: ");
-                registerPassword = sc.nextLine();
+                try {
+                    System.out.print("Mật khẩu: ");
+                    registerPassword = sc.nextLine();
 
-                if (registerPassword.matches(regexPassword)) {
-                    int checkId = studentService.getStudentByEmail(registerEmail, "ADMIN").getId();
+                    if (registerPassword.matches(regexPassword)) {
+                        Student student =
+                                studentService.getStudentByEmail(registerEmail, "ADMIN");
 
-                    return studentService.updatePassword(checkId , registerPassword) ? "Đổi mật khẩu thành công" : "Đổi mật khẩu không thành công";
+                        if (student == null) {
+                            return "Không tìm thấy tài khoản";
+                        }
+
+                        return studentService.updatePassword(student.getId(), registerPassword)
+                                ? "Đổi mật khẩu thành công"
+                                : "Đổi mật khẩu thất bại";
+                    }
+                    System.out.println(
+                            "Mật khẩu phải có ít nhất 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt!");
                 }
-                System.out.println(
-                        "Mật khẩu phải có ít nhất 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt!");
+                catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
 
         }

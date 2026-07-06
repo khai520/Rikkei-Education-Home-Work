@@ -12,6 +12,7 @@ public interface IEnrollmentDAO {
     public List<Course> getCourseByStudentId(int id, Enrollment.Status status);
     public List<EnrollmentDTO> getAllDTO( Enrollment.Status status);
     public List<Enrollment> getAll( Enrollment.Status status);
+    public boolean existCourse (int id);
     public boolean checkIC(int studentId , int courseid ,  Enrollment.Status status);
     public boolean checkId (int id , Enrollment.Status status);
     public boolean updateStatus(int id, Enrollment.Status status);

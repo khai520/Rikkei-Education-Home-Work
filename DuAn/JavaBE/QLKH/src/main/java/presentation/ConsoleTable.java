@@ -2,8 +2,11 @@ package presentation;
 
 import model.Course;
 import model.Student;
+import model.dto.EnrollmentDTO;
 
+import java.util.List;
 import java.util.Scanner;
+import java.util.function.Consumer;
 
 public class ConsoleTable {
 
@@ -42,11 +45,10 @@ public class ConsoleTable {
     }
 
     public static void courseRow(Course c) {
-
         System.out.printf("| %-4d | %-30s | %-25s | %-10d | %-15s |%n",
                 c.getId(),
                 c.getName(),
-                c.getInstruction(),
+                c.getInstructor(),
                 c.getDuration(),
                 c.getCreate_at());
     }
@@ -73,6 +75,29 @@ public class ConsoleTable {
                 name,
                 totalStudent);
     }
+    public static void enrollmentHeader() {
+
+        printLine(110);
+
+        System.out.printf("| %-4s | %-25s | %-25s | %-20s | %-10s |%n",
+                "ID",
+                "Học viên",
+                "Khóa học",
+                "Ngày đăng ký",
+                "Trạng thái");
+
+        printLine(110);
+    }
+
+    public static void enrollmentRow(EnrollmentDTO e) {
+
+        System.out.printf("| %-4d | %-25s | %-25s | %-20s | %-10s |%n",
+                e.id,
+                e.studentName,
+                e.courseName,
+                e.registered_at,
+                e.status);
+    }
 
 
     public static void Footer() {
@@ -83,5 +108,73 @@ public class ConsoleTable {
     public static void pause() {
         System.out.print("\nNhấn Enter để tiếp tục...");
         sc.nextLine();
+    }
+    public static <T> void paginate(
+            List<T> list,
+            int pageSize,
+            Consumer<T> printer,
+            Runnable header,
+            Runnable footer) {
+
+        if (list == null || list.isEmpty()) {
+            System.out.println("Không có dữ liệu!");
+            pause();
+            return;
+        }
+
+        int currentPage = 1;
+        int totalPage = (int) Math.ceil((double) list.size() / pageSize);
+
+        if (totalPage == 1) {
+            header.run();
+            list.forEach(printer);
+            footer.run();
+            return;
+        }
+
+        while (true) {
+
+            int from = (currentPage - 1) * pageSize;
+            int to = Math.min(from + pageSize, list.size());
+
+            header.run();
+            list.subList(from, to).forEach(printer);
+            footer.run();
+
+            System.out.printf("Trang %d/%d%n", currentPage, totalPage);
+            System.out.println("[P] Trang trước");
+            System.out.println("[N] Trang sau");
+            System.out.println("[0] Quay lại");
+            System.out.print("Chọn: ");
+
+            String input = sc.nextLine().trim().toUpperCase();
+
+            switch (input) {
+                case "P":
+                    if (currentPage > 1) {
+                        currentPage--;
+                    } else {
+                        System.out.println("Đây là trang đầu!");
+                        pause();
+                    }
+                    break;
+
+                case "N":
+                    if (currentPage < totalPage) {
+                        currentPage++;
+                    } else {
+                        System.out.println("Đây là trang cuối!");
+                        pause();
+                    }
+                    break;
+
+                case "0":
+                    return;
+
+                default:
+                    System.out.println("Lựa chọn không hợp lệ!");
+                    pause();
+            }
+        }
     }
 }
