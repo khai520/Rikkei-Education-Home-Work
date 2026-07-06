@@ -23,30 +23,20 @@ public class StudentDAO implements IStudentDAO {
         s.setCreate_at(rs.getDate("create_at").toLocalDate());
     }
 
-    private Student setsql(String str, PreparedStatement pstmt) throws SQLException {
-        pstmt.setString(1, str);
-        ResultSet rs = pstmt.executeQuery();
-        Student s = new Student();
-        if (rs.next()) {
-            setobj(rs, s);
-            return s;
-        }
-        return null;
-    }
+
 
     @Override
     public List<Student> getAllStudents() {
         Connection conn = null;
+        ResultSet rs = null;
+        PreparedStatement pstmt = null;
         List<Student> students = new ArrayList<>();
         try {
             conn = DBUtil.getConnection();
             String sql = "select * from student WHERE role != 'ADMIN'";
-            if (conn == null) {
-                throw new RuntimeException("Không kết nối được database");
-            }
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sql);
-
+            assert conn != null;
+            pstmt = conn.prepareStatement(sql);
+            rs = pstmt.executeQuery();
             while (rs.next()) {
                 Student s = new Student();
                 setobj(rs, s);
@@ -54,11 +44,11 @@ public class StudentDAO implements IStudentDAO {
             }
             return students;
         } catch (SQLException e) {
-            System.out.println("Không tìm thấy bảng student");
+            e.printStackTrace();
             return students;
         }
         finally {
-            DBUtil.closeConnection(conn);
+            DBUtil.closeConnection(conn , rs, pstmt);
         }
     }
 
@@ -66,13 +56,15 @@ public class StudentDAO implements IStudentDAO {
     @Override
     public Student getStudentById( int id , String role) {
         Connection conn = null;
+        ResultSet rs = null;
+        PreparedStatement pstmt = null;
         try {
             conn = DBUtil.getConnection();
             assert conn != null;
-            PreparedStatement pstmt = conn.prepareStatement( "SELECT * FROM student WHERE id = ? AND role != ? ;" );
+            pstmt = conn.prepareStatement( "SELECT * FROM student WHERE id = ? AND role != ? ;" );
             pstmt.setInt(1, id);
             pstmt.setString(2, role == null ? "null" : role);
-            ResultSet rs = pstmt.executeQuery();
+            rs = pstmt.executeQuery();
             Student s = new Student();
             if (rs.next()) {
                 setobj(rs, s);
@@ -85,7 +77,7 @@ public class StudentDAO implements IStudentDAO {
             return null;
         }
         finally {
-            DBUtil.closeConnection(conn);
+            DBUtil.closeConnection(conn , rs, pstmt);
         }
     }
 
@@ -94,26 +86,34 @@ public class StudentDAO implements IStudentDAO {
     @Override
     public Student getStudentByEmail(String email , String role) {
         Connection conn = null;
+        ResultSet rs = null;
+        PreparedStatement pstmt = null;
         try {
             conn = DBUtil.getConnection();
+
+            String sql =
+                    "SELECT * FROM student WHERE email= ? AND (role IS NULL OR role<>?)";
+
             assert conn != null;
-            PreparedStatement pstmt = conn.prepareStatement( "SELECT * FROM student WHERE email = ? AND role != ?");
+            pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, email);
-            pstmt.setString(2, role == null ? "null" : role);
-            ResultSet rs = pstmt.executeQuery();
-            Student s = new Student();
+            pstmt.setString(2, role == null ? "null" : role );
+
+            rs = pstmt.executeQuery();
+
             if (rs.next()) {
+                Student s = new Student();
                 setobj(rs, s);
                 return s;
             }
-            return null;
         } catch (SQLException e) {
             e.printStackTrace();
             return null;
         }
         finally {
-            DBUtil.closeConnection(conn);
+            DBUtil.closeConnection(conn , rs, pstmt);
         }
+        return null;
     }
 
 
@@ -121,13 +121,15 @@ public class StudentDAO implements IStudentDAO {
     @Override
     public List<Student> getStudentByName(String name , String role) {
         Connection conn = null;
+        ResultSet rs = null;
+        PreparedStatement pstmt = null;
         try {
             conn = DBUtil.getConnection();
             assert conn != null;
-            PreparedStatement pstmt = conn.prepareStatement( "SELECT * FROM student WHERE name ILIKE ? AND role != ?");
+            pstmt = conn.prepareStatement( "SELECT * FROM student WHERE name ILIKE ? AND role != ?");
             pstmt.setString(1, "%" + name + "%");
             pstmt.setString(2, role == null ? "null" : role);
-            ResultSet rs = pstmt.executeQuery();
+            rs = pstmt.executeQuery();
             List<Student> students = new ArrayList<>();
             while (rs.next()) {
                 Student s = new Student();
@@ -140,43 +142,46 @@ public class StudentDAO implements IStudentDAO {
             return null;
         }
         finally {
-            DBUtil.closeConnection(conn);
+            DBUtil.closeConnection(conn , rs, pstmt);
         }
     }
 
     @Override
     public boolean checkTk(String email) {
         Connection conn = null;
+        ResultSet rs = null;
+        PreparedStatement pstmt = null;
         try {
             conn = DBUtil.getConnection();
             assert conn != null;
-            PreparedStatement pstmt = conn.prepareStatement("SELECT password FROM student WHERE email = ?");
-            pstmt.setString(1 , email);
-            ResultSet rs = pstmt.executeQuery();
-            Student  s = new Student();
+            pstmt = conn.prepareStatement(
+                    "SELECT password FROM student WHERE email = ?");
+            pstmt.setString(1, email);
+            rs = pstmt.executeQuery();
             if (rs.next()) {
-                s.setPassword(rs.getString("password"));
+                String password = rs.getString("password");
+                return password.isEmpty();
             }
-            return s.getPassword() == null || s.getPassword().isEmpty();
+            return rs.next();
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
+        } finally {
+            DBUtil.closeConnection(conn, rs, pstmt);
         }
-        finally {
-            DBUtil.closeConnection(conn);
-        }
-
     }
 
     @Override
     public int login(String email, String password) {
         Connection conn = null;
+        ResultSet rs = null;
+        PreparedStatement pstmt = null;
         try {
             conn = DBUtil.getConnection();
             assert conn != null;
-            PreparedStatement pstmt = conn.prepareStatement( "SELECT id, password FROM student WHERE email = ?");
+            pstmt = conn.prepareStatement( "SELECT id, password FROM student WHERE email = ?");
             pstmt.setString(1, email);
-            ResultSet rs = pstmt.executeQuery();
+            rs = pstmt.executeQuery();
             if (rs.next()) {
                 String hash = rs.getString("password");
 
@@ -190,17 +195,18 @@ public class StudentDAO implements IStudentDAO {
             return 0;
         }
         finally {
-            DBUtil.closeConnection(conn);
+            DBUtil.closeConnection(conn , rs, pstmt);
         }
     }
 
     @Override
     public boolean addStudent(Student student) {
         Connection conn = null;
+        PreparedStatement pstmt = null;
         try {
             conn = DBUtil.getConnection();
             assert conn != null;
-            PreparedStatement  pstmt = conn.prepareStatement(
+            pstmt = conn.prepareStatement(
             "INSERT INTO student(name, dob, email, sex, phone, role, password )" +
                 "VALUES (?, ?, ?, ?, ?, ?, ?)");
             pstmt.setString(1, student.getName());
@@ -209,7 +215,9 @@ public class StudentDAO implements IStudentDAO {
             pstmt.setBoolean(4, student.getSex());
             pstmt.setString(5, student.getPhone());
             pstmt.setString(6, student.getRole().name());
-            pstmt.setString(7, BCrypt.hashpw(student.getPassword(), BCrypt.gensalt()));
+            pstmt.setString(7, student.getPassword() == null ? "" : BCrypt.hashpw(student.getPassword(), BCrypt.gensalt()));
+
+
             int rs = pstmt.executeUpdate();
             return rs > 0;
         } catch (SQLException e) {
@@ -217,17 +225,18 @@ public class StudentDAO implements IStudentDAO {
             return false;
         }
         finally {
-            DBUtil.closeConnection(conn);
+            DBUtil.closeConnection(conn , null, pstmt);
         }
     }
 
     @Override
     public boolean updateStudent(Student student) {
         Connection conn = null;
+        PreparedStatement pstmt = null;
         try {
             conn = DBUtil.getConnection();
             assert conn != null;
-            PreparedStatement  pstmt = conn.prepareStatement(
+            pstmt = conn.prepareStatement(
             "UPDATE student SET name = ? , dob = ? , sex = ? ,  phone = ?  WHERE id = ?");
             pstmt.setString(1, student.getName());
             pstmt.setDate(2, java.sql.Date.valueOf(student.getDob()));
@@ -241,17 +250,18 @@ public class StudentDAO implements IStudentDAO {
             return false;
         }
         finally {
-            DBUtil.closeConnection(conn);
+            DBUtil.closeConnection(conn , null, pstmt);
         }
     }
 
     @Override
     public boolean deleteStudent(int id) {
         Connection conn = null;
+        PreparedStatement pstmt = null;
         try {
             conn = DBUtil.getConnection();
             assert conn != null;
-            PreparedStatement  pstmt = conn.prepareStatement(
+            pstmt = conn.prepareStatement(
                     "DELETE FROM student WHERE id = ?");
             pstmt.setInt(1, id);
             int rs = pstmt.executeUpdate();
@@ -261,17 +271,18 @@ public class StudentDAO implements IStudentDAO {
             return false;
         }
         finally {
-            DBUtil.closeConnection(conn);
+            DBUtil.closeConnection(conn , null, pstmt);
         }
     }
 
     @Override
     public boolean  updatePassword(int id, String password) {
         Connection conn = null;
+        PreparedStatement pstmt = null;
         try {
             conn = DBUtil.getConnection();
             assert conn != null;
-            PreparedStatement  pstmt = conn.prepareStatement(
+            pstmt = conn.prepareStatement(
                     "UPDATE student SET password = ? WHERE id = ?");
             pstmt.setString(1, BCrypt.hashpw(password, BCrypt.gensalt()));
             pstmt.setInt(2, id);
@@ -282,26 +293,39 @@ public class StudentDAO implements IStudentDAO {
             return false;
         }
         finally {
-            DBUtil.closeConnection(conn);
+            DBUtil.closeConnection(conn , null, pstmt);
         }
     }
 
     @Override
     public boolean ktmkc(int id, String password) {
         Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
         try {
             conn = DBUtil.getConnection();
+
             assert conn != null;
-            PreparedStatement pstmt = conn.prepareStatement( "SELECT * FROM student WHERE email = ? AND password = ?");
+            pstmt = conn.prepareStatement(
+                    "SELECT password FROM student WHERE id = ?");
+
             pstmt.setInt(1, id);
-            pstmt.setString(2, BCrypt.hashpw(password, BCrypt.gensalt()));
-            return pstmt.executeUpdate() > 0;
+
+            rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                String hash = rs.getString("password");
+                return BCrypt.checkpw(password, hash);
+            }
+
+            return false;
+
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
-        }
-        finally {
-            DBUtil.closeConnection(conn);
+        } finally {
+            DBUtil.closeConnection(conn, rs, pstmt);
         }
     }
 }

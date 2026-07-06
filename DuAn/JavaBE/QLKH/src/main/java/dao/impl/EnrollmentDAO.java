@@ -28,7 +28,7 @@ public class EnrollmentDAO implements IEnrollmentDAO {
         c.setId(rs.getInt("id"));
         c.setName(rs.getString("name"));
         c.setDuration(rs.getInt("duration"));
-        c.setInstruction(rs.getString("instruction"));
+        c.setInstructor(rs.getString("instructor"));
         c.setCreate_at(rs.getDate("create_at").toLocalDate());
     }
     private void setobjs(ResultSet rs, Student s) throws SQLException {
@@ -44,11 +44,13 @@ public class EnrollmentDAO implements IEnrollmentDAO {
     @Override
     public List<Student> getStudentByCourseId(int id , Enrollment.Status status) {
         Connection conn = null;
+        ResultSet rs = null;
+        PreparedStatement pstmt = null;
         List<Student> students = new ArrayList<>();
         try {
             conn = DBUtil.getConnection();
             assert conn != null;
-            PreparedStatement pstmt = conn.prepareStatement(
+            pstmt = conn.prepareStatement(
                     """
                     SELECT s.*
                     FROM enrollment e
@@ -58,7 +60,7 @@ public class EnrollmentDAO implements IEnrollmentDAO {
                     """);
             pstmt.setInt(1, id);
             pstmt.setString(2, status.name());
-            ResultSet rs = pstmt.executeQuery();
+            rs = pstmt.executeQuery();
 
             while ( rs.next() ) {
                 Student s = new Student();
@@ -71,28 +73,30 @@ public class EnrollmentDAO implements IEnrollmentDAO {
             return students;
         }
         finally {
-            DBUtil.closeConnection(conn);
+            DBUtil.closeConnection(conn , rs, pstmt);
         }
     }
 
     @Override
     public List<Course> getCourseByStudentId(int id , Enrollment.Status status) {
         Connection conn = null;
+        ResultSet rs = null;
+        PreparedStatement pstmt = null;
         List<Course> courses = new ArrayList<>();
         try {
             conn = DBUtil.getConnection();
             assert conn != null;
-            PreparedStatement pstmt = conn.prepareStatement(
+            pstmt = conn.prepareStatement(
                     """
                    SELECT c.*
                    FROM enrollment e
                    JOIN course c
                        ON e.course_id = c.id
-                   WHERE e.course_id = ? AND e.status = ?
+                   WHERE e.student_id = ? AND e.status = ?
                    """);
             pstmt.setInt(1, id);
             pstmt.setString(2, status.name());
-            ResultSet rs = pstmt.executeQuery();
+            rs = pstmt.executeQuery();
 
             while ( rs.next() ) {
                 Course c = new Course();
@@ -105,18 +109,20 @@ public class EnrollmentDAO implements IEnrollmentDAO {
             return courses;
         }
         finally {
-            DBUtil.closeConnection(conn);
+            DBUtil.closeConnection(conn , rs, pstmt);
         }
     }
 
     @Override
     public List<EnrollmentDTO> getAllDTO(Enrollment.Status status) {
         Connection conn = null;
+        ResultSet rs = null;
+        PreparedStatement pstmt = null;
         List<EnrollmentDTO> enrollmentDTOS = new ArrayList<>();
         try {
             conn = DBUtil.getConnection();
             assert conn != null;
-            PreparedStatement pstmt = conn.prepareStatement(
+            pstmt = conn.prepareStatement(
                     """
                     SELECT
                        e.id,
@@ -128,11 +134,11 @@ public class EnrollmentDAO implements IEnrollmentDAO {
                    JOIN student s
                        ON e.student_id = s.id
                    JOIN course c
-                       ON e.course_id = c.id;
+                       ON e.course_id = c.id
                    WHERE e.status = ?
                    """);
             pstmt.setString(1, status.name());
-            ResultSet rs = pstmt.executeQuery();
+            rs = pstmt.executeQuery();
 
             while ( rs.next() ) {
                 EnrollmentDTO e = new EnrollmentDTO();
@@ -149,18 +155,20 @@ public class EnrollmentDAO implements IEnrollmentDAO {
             return enrollmentDTOS;
         }
         finally {
-            DBUtil.closeConnection(conn);
+            DBUtil.closeConnection(conn , rs, pstmt);
         }
     }
 
     @Override
     public List<Enrollment> getAll(Enrollment.Status status) {
         Connection conn = null;
+        ResultSet rs = null;
+        PreparedStatement pstmt = null;
         List<Enrollment> enrollments = new ArrayList<>();
         try {
             conn = DBUtil.getConnection();
             assert conn != null;
-            PreparedStatement pstmt = conn.prepareStatement(
+            pstmt = conn.prepareStatement(
                     """
                     SELECT
                        id,
@@ -172,7 +180,7 @@ public class EnrollmentDAO implements IEnrollmentDAO {
                    WHERE status = ?
                    """);
             pstmt.setString(1, status.name());
-            ResultSet rs = pstmt.executeQuery();
+            rs = pstmt.executeQuery();
 
             while ( rs.next() ) {
                 Enrollment e = new Enrollment();
@@ -185,18 +193,44 @@ public class EnrollmentDAO implements IEnrollmentDAO {
             return enrollments;
         }
         finally {
-            DBUtil.closeConnection(conn);
+            DBUtil.closeConnection(conn , rs, pstmt);
+        }
+    }
+
+    @Override
+    public boolean existCourse(int id) {
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        try {
+            conn = DBUtil.getConnection();
+            assert conn != null;
+            pstmt = conn.prepareStatement(
+                    """
+                    SELECT s.*
+                    FROM enrollment e
+                    JOIN student s
+                        ON e.student_id = s.id
+                    WHERE e.course_id = ?
+                    """);
+            pstmt.setInt(1, id);
+            return pstmt.executeQuery().next();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+        finally {
+            DBUtil.closeConnection(conn , null, pstmt);
         }
     }
 
     @Override
     public boolean checkIC(int studentId, int courseid, Enrollment.Status status) {
         Connection conn = null;
-        List<EnrollmentDTO> enrollmentDTOS = new ArrayList<>();
+        PreparedStatement pstmt = null;
         try {
             conn = DBUtil.getConnection();
             assert conn != null;
-            PreparedStatement pstmt = conn.prepareStatement(
+            pstmt = conn.prepareStatement(
                     """
                     SELECT
                        *
@@ -211,24 +245,24 @@ public class EnrollmentDAO implements IEnrollmentDAO {
             pstmt.setInt(2, studentId);
             pstmt.setInt(3, courseid);
 
-            return pstmt.executeUpdate() > 0;
+            return pstmt.executeQuery().next();
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
         finally {
-            DBUtil.closeConnection(conn);
+            DBUtil.closeConnection(conn , null, pstmt);
         }
     }
 
     @Override
     public boolean checkId(int id , Enrollment.Status status) {
         Connection conn = null;
-        List<EnrollmentDTO> enrollmentDTOS = new ArrayList<>();
+        PreparedStatement pstmt = null;
         try {
             conn = DBUtil.getConnection();
             assert conn != null;
-            PreparedStatement pstmt = conn.prepareStatement(
+            pstmt = conn.prepareStatement(
                     """
                     SELECT
                        *
@@ -238,25 +272,25 @@ public class EnrollmentDAO implements IEnrollmentDAO {
             pstmt.setString(1, status.name());
             pstmt.setInt(2, id);
 
-            return pstmt.executeUpdate() > 0;
+            return pstmt.executeQuery().next();
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
         finally {
-            DBUtil.closeConnection(conn);
+            DBUtil.closeConnection(conn , null, pstmt);
         }
     }
 
     @Override
     public boolean updateStatus(int id, Enrollment.Status status) {
         Connection conn = null;
+        PreparedStatement pstmt = null;
         try {
             conn = DBUtil.getConnection();
             assert conn != null;
-            PreparedStatement pstmt = conn.prepareStatement(
+            pstmt = conn.prepareStatement(
                 """
-                   
                    UPDATE enrollment
                    SET status = ?
                    WHERE id = ?;
@@ -269,19 +303,20 @@ public class EnrollmentDAO implements IEnrollmentDAO {
             return false;
         }
         finally {
-            DBUtil.closeConnection(conn);
+            DBUtil.closeConnection(conn , null, pstmt);
         }
     }
 
     @Override
     public boolean addEnrollment(int studentid , int courseid) {
         Connection conn = null;
+        PreparedStatement pstmt = null;
 
         try {
             conn = DBUtil.getConnection();
             assert conn != null;
 
-            PreparedStatement pstmt = conn.prepareStatement(
+            pstmt = conn.prepareStatement(
             """
                 INSERT INTO enrollment(student_id, course_id)
                 VALUES (?, ?)
@@ -296,19 +331,20 @@ public class EnrollmentDAO implements IEnrollmentDAO {
             e.printStackTrace();
             return false;
         } finally {
-            DBUtil.closeConnection(conn);
+            DBUtil.closeConnection(conn , null, pstmt);
         }
     }
 
     @Override
     public boolean deleteByStudentAndCourse(int studentId, int courseId) {
         Connection conn = null;
+        PreparedStatement pstmt = null;
 
         try {
             conn = DBUtil.getConnection();
             assert conn != null;
 
-            PreparedStatement pstmt = conn.prepareStatement("""
+            pstmt = conn.prepareStatement("""
                 DELETE FROM enrollment
                 WHERE student_id = ? AND course_id = ?
                 """);
@@ -322,7 +358,7 @@ public class EnrollmentDAO implements IEnrollmentDAO {
             e.printStackTrace();
             return false;
         } finally {
-            DBUtil.closeConnection(conn);
+            DBUtil.closeConnection(conn , null, pstmt);
         }
     }
 

@@ -3,7 +3,7 @@ package presentation.Admin;
 import java.util.Scanner;
 
 public class ViewAdmin {
-    private static final Scanner sc = new Scanner(System.in);
+    private static Scanner sc = new Scanner(System.in);
 
     public static void adminView() {
 
@@ -52,6 +52,7 @@ public class ViewAdmin {
                 default:
                     System.out.println("Vui lòng nhập từ 0 - 4.");
             }
+            sc = new Scanner(System.in);
         }
     }
 }

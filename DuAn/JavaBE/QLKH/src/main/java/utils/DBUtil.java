@@ -1,8 +1,6 @@
 package utils;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class DBUtil {
     public static final String USER_NAME = "postgres";
@@ -21,12 +19,26 @@ public class DBUtil {
         }
         return null;
     }
-    public static void closeConnection(Connection conn) {
+    public static void closeConnection(Connection conn, ResultSet rs , PreparedStatement pstmt) {
+        if (rs != null) {
+            try {
+                rs.close();
+            }catch (SQLException e){
+                e.printStackTrace();
+            }
+        }
+        if (pstmt != null) {
+            try {
+                pstmt.close();
+            }catch (SQLException e){
+                e.printStackTrace();
+            }
+        }
         if (conn != null) {
             try {
                 conn.close();
             } catch (SQLException e) {
-                throw new RuntimeException(e);
+                e.printStackTrace();
             }
         }
     }

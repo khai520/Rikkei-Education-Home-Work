@@ -5,22 +5,22 @@ import business.impl.EnrollmentService;
 import business.impl.StudentService;
 import model.Course;
 import model.Enrollment;
-import model.Student;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class ViewStudent {
     static Scanner sc = new Scanner(System.in);
     private static final CourseService courseService = new CourseService();
     private static final StudentService studentService = new StudentService();
     private static final EnrollmentService enrollmentService = new EnrollmentService();
-    public static int id ;
+    private static int id;
     public static void studentView(int studentId) {
         id = studentId;
         while (true) {
-
             System.out.println("\n========== MENU HỌC VIÊN ==========");
             System.out.println("1. Xem danh sách khóa học");
             System.out.println("2. Xem khóa học đã đăng ký");
@@ -43,7 +43,6 @@ public class ViewStudent {
 
                 case 1:
                     allcourseView();
-                    courseView();
                     break;
 
 
@@ -56,7 +55,7 @@ public class ViewStudent {
                     break;
 
                 case 4:
-                    changePasswordView(id);
+                    changePasswordView();
                     break;
 
                 case 0:
@@ -65,17 +64,60 @@ public class ViewStudent {
                 default:
                     System.out.println("Lựa chọn không hợp lệ!");
             }
+            sc = new Scanner(System.in);
         }
     }
-    private  static void allcourseView() {
+    private static void allcourseView() {
+
+        List<Integer> registeredCourseIds = enrollmentService
+                .getAll(Enrollment.Status.CONFIRM)
+                .stream()
+                .filter(x -> x.getStudent_id() == id)
+                .map(Enrollment::getCourse_id)
+                .toList();
+
+        Map<Integer, Long> totalStudent = enrollmentService
+                .getAll(Enrollment.Status.CONFIRM)
+                .stream()
+                .collect(Collectors.groupingBy(
+                        Enrollment::getCourse_id,
+                        Collectors.counting()
+                ));
+
+        System.out.println("\n========================================= KHÓA HỌC ĐỀ XUẤT ===================================================");
+
+        List<Course> recommend = courseService.getAllCourse()
+                .stream()
+                .filter(c -> !registeredCourseIds.contains(c.getId()))
+                .sorted((a, b) -> Long.compare(
+                        totalStudent.getOrDefault(b.getId(), 0L),
+                        totalStudent.getOrDefault(a.getId(), 0L)))
+                .limit(5)
+                .toList();
+
+        if (recommend.isEmpty()) {
+            System.out.println("Bạn đã đăng ký tất cả khóa học!");
+        } else {
+            ConsoleTable.courseHeader();
+            recommend.forEach(ConsoleTable::courseRow);
+            ConsoleTable.Footer();
+        }
+
         System.out.println("\n========== DANH SÁCH KHÓA HỌC ==========");
 
-        ConsoleTable.studentHeader();
-        courseService.getAllCourse().forEach(ConsoleTable::courseRow);
-        ConsoleTable.Footer();
+        ConsoleTable.paginate(
+                courseService.getAllCourse(),
+                5,
+                ConsoleTable::courseRow,
+                ConsoleTable::courseHeader,
+                ConsoleTable::Footer
+        );
+
+        if (!courseService.getAllCourse().isEmpty()) {
+            courseView();
+        }
     }
     private static void courseView() {
-
         while (true) {
             System.out.println("1. Tìm kiếm khóa học");
             System.out.println("2. Đăng ký khóa học");
@@ -108,17 +150,26 @@ public class ViewStudent {
                         System.out.println("Không được để trống");
                     }
 
-                    final String search = keyword;
-
-                    ConsoleTable.courseHeader();
-                    courseService.getAllCourse()
-                            .stream()
-                            .filter(x -> x.getName().equalsIgnoreCase(search))
-                            .forEach(ConsoleTable::courseRow);
-                    ConsoleTable.Footer();
+                    final String search = keyword.toLowerCase();
+                    ConsoleTable.paginate(
+                            courseService.getAllCourse()
+                                    .stream()
+                                    .filter(x -> x.getName().toLowerCase().contains(search)).toList(),
+                            5,
+                            ConsoleTable::courseRow,
+                            ConsoleTable::courseHeader,
+                            ConsoleTable::Footer
+                    );
                     break;
                 case 2:
                     registerCourseView();
+                    ConsoleTable.paginate(
+                            courseService.getAllCourse(),
+                            5,
+                            ConsoleTable::courseRow,
+                            ConsoleTable::courseHeader,
+                            ConsoleTable::Footer
+                    );
                     break;
                 case 0:
                     return;
@@ -129,44 +180,81 @@ public class ViewStudent {
         }
     }
     private static void registerCourseView() {
-
+        int courseId;
         while (true) {
-            System.out.print("\nNhập ID khóa học (0 để quay lại): ");
-
-            int courseId;
-
+            System.out.print("Nhập ID khóa học (0 để quay lại): ");
             try {
                 courseId = Integer.parseInt(sc.nextLine());
+                if (courseId == 0) return;
                 if (courseService.getCourseById(courseId) == null) {
                     System.out.println("Khóa học không tồn tại");
+                    continue;
+                }
+                if (enrollmentService.checkIC(id , courseId , Enrollment.Status.WAITING) || enrollmentService.checkIC(id , courseId , Enrollment.Status.CONFIRM)){
+                    System.out.println("Khóa học này đã đăng ký");
+                    continue;
                 }
             } catch (NumberFormatException e) {
                 System.out.println("ID không hợp lệ!");
                 continue;
             }
+            break;
+        }
+        if (enrollmentService.checkIC(id , courseId , Enrollment.Status.CANCEL)) {
+            System.out.print("Khóa học đã bị hủy bạn có muốn đăng ký lại 1.Y/0.N: ");
+            int choice;
+            while (true) {
+                try {
+                    choice = Integer.parseInt(sc.nextLine());
+                    break;
+                } catch (NumberFormatException e) {
+                    System.out.println("Vui lòng nhập số!");
+                }
+            }
+            if (choice == 1) {
+                final int finalCourseId = courseId;
 
-            if (courseId == 0)
+                Enrollment enrollment = enrollmentService.getAll(Enrollment.Status.CANCEL)
+                        .stream()
+                        .filter(x -> x.getStudent_id() == id
+                                && x.getCourse_id() == finalCourseId)
+                        .findFirst()
+                        .orElse(null);
+
+                assert enrollment != null;
+                if (enrollmentService.updateStatus(enrollment.getId(), Enrollment.Status.WAITING)){
+                    System.out.println("Đăng ký lại thành công");
+                }
+                else
+                {
+                    System.out.println("Đăng ký lại thất bại");
+                }
+
                 return;
-
-            if(enrollmentService.addEnrollment(id, courseId)){
-                System.out.println("Đăng ký thành công!");
             }
-            else {
-                System.out.println("Đăng ký không thành công!");
-            }
+        }
+        if(enrollmentService.addEnrollment(id, courseId)){
+            System.out.println("Đăng ký thành công!");
 
-
+        }
+        else {
+            System.out.println("Đăng ký không thành công!");
         }
     }
     private static void myCourseView() {
         List<Course> courses = enrollmentService.getCourseByStudentId(id , Enrollment.Status.CONFIRM);
         while (true) {
-
-            System.out.println("\n========== KHÓA HỌC ĐÃ ĐĂNG KÝ ==========");
-            ConsoleTable.courseHeader();
-            courses.forEach(ConsoleTable::courseRow);
-            ConsoleTable.Footer();
-
+            System.out.println("========== KHÓA HỌC ĐÃ ĐĂNG KÝ ==========");
+            ConsoleTable.paginate(
+                    courses,
+                    5,
+                    ConsoleTable::courseRow,
+                    ConsoleTable::courseHeader,
+                    ConsoleTable::Footer
+            );
+            if (courses.isEmpty()) {
+                break;
+            }
             System.out.println("1. Sắp xếp theo tên tăng dần");
             System.out.println("2. Sắp xếp theo tên giảm dần");
             System.out.println("3. Sắp xếp theo ngày đăng ký tăng dần");
@@ -187,27 +275,43 @@ public class ViewStudent {
             switch (choice) {
 
                 case 1:
-                    ConsoleTable.studentHeader();
-                    courses.stream().sorted(Comparator.comparing(Course::getId)).forEach(ConsoleTable::courseRow);
-                    ConsoleTable.Footer();
+                    ConsoleTable.paginate(
+                            courses.stream().sorted(Comparator.comparing(Course::getName)).toList(),
+                            5,
+                            ConsoleTable::courseRow,
+                            ConsoleTable::courseHeader,
+                            ConsoleTable::Footer
+                    );
                     break;
 
                 case 2:
-                    ConsoleTable.studentHeader();
-                    courses.stream().sorted(Comparator.comparing(Course::getId).reversed()).forEach(ConsoleTable::courseRow);
-                    ConsoleTable.Footer();
+                    ConsoleTable.paginate(
+                            courses.stream().sorted(Comparator.comparing(Course::getName).reversed()).toList(),
+                            5,
+                            ConsoleTable::courseRow,
+                            ConsoleTable::courseHeader,
+                            ConsoleTable::Footer
+                    );
                     break;
 
                 case 3:
-                    ConsoleTable.studentHeader();
-                    courses.stream().sorted(Comparator.comparing(Course::getCreate_at)).forEach(ConsoleTable::courseRow);
-                    ConsoleTable.Footer();
+                    ConsoleTable.paginate(
+                            courses.stream().sorted(Comparator.comparing(Course::getCreate_at)).toList(),
+                            5,
+                            ConsoleTable::courseRow,
+                            ConsoleTable::courseHeader,
+                            ConsoleTable::Footer
+                    );
                     break;
 
                 case 4:
-                    ConsoleTable.studentHeader();
-                    courses.stream().sorted(Comparator.comparing(Course::getCreate_at).reversed()).forEach(ConsoleTable::courseRow);
-                    ConsoleTable.Footer();
+                    ConsoleTable.paginate(
+                            courses.stream().sorted(Comparator.comparing(Course::getCreate_at).reversed()).toList(),
+                            5,
+                            ConsoleTable::courseRow,
+                            ConsoleTable::courseHeader,
+                            ConsoleTable::Footer
+                    );
                     break;
 
                 case 0:
@@ -223,26 +327,32 @@ public class ViewStudent {
         while (true) {
 
             System.out.println("\n========== HỦY ĐĂNG KÝ ==========");
-            ConsoleTable.courseHeader();
-            enrollmentService.getCourseByStudentId(id , Enrollment.Status.WAITING).forEach(ConsoleTable::courseRow);
-            ConsoleTable.Footer();
+            ConsoleTable.paginate(
+                    enrollmentService.getCourseByStudentId(id , Enrollment.Status.WAITING),
+                    5,
+                    ConsoleTable::courseRow,
+                    ConsoleTable::courseHeader,
+                    ConsoleTable::Footer
+            );
+            if (enrollmentService.getCourseByStudentId(id , Enrollment.Status.WAITING ) == null){
+                return;
+            }
             System.out.print("Nhập ID khóa học muốn hủy (0 để quay lại): ");
 
-            int id;
+            int idkh;
 
             try {
-                id = Integer.parseInt(sc.nextLine());
-                if (enrollmentService.checkId(id , Enrollment.Status.WAITING)) {
+                idkh = Integer.parseInt(sc.nextLine());
+                if (idkh == 0)
+                    return;
+                if (!enrollmentService.checkIC(id , idkh , Enrollment.Status.WAITING)) {
                     System.out.println("Id không tồn tại");
-                    break;
+                    continue;
                 }
             } catch (NumberFormatException e) {
                 System.out.println("ID không hợp lệ!");
                 continue;
             }
-
-            if (id == 0)
-                return;
 
             System.out.print("Bạn có chắc chắn? (1.Có / 0.Không): ");
 
@@ -255,28 +365,26 @@ public class ViewStudent {
             }
 
             if (confirm == 1) {
-
-                if (enrollmentService.updateStatus(id , Enrollment.Status.CANCEL)) {
-                    System.out.println("Đã từ chối đăng ký.");
+                final int finalCourseId = idkh;
+                Enrollment enrollment = enrollmentService.getAll(Enrollment.Status.WAITING)
+                        .stream()
+                        .filter(x -> x.getStudent_id() == id
+                                && x.getCourse_id() == finalCourseId)
+                        .findFirst()
+                        .orElse(null);
+                assert enrollment != null;
+                if (enrollmentService.updateStatus(enrollment.getId() , Enrollment.Status.CANCEL)) {
+                    System.out.println("Hủy thành công.");
                 } else {
                     System.out.println("Thao tác thất bại.");
                 }
-
-                System.out.println("Hủy thành công.");
             }
         }
     }
 
-    private static void changePasswordView(int id) {
+    private static void changePasswordView() {
 
         System.out.println("\n========== ĐỔI MẬT KHẨU ==========");
-
-        Student student = studentService.getStudentById(id, null);
-
-        if (student == null) {
-            System.out.println("Không tìm thấy tài khoản!");
-            return;
-        }
 
         String oldPassword;
         while (true) {
@@ -288,12 +396,10 @@ public class ViewStudent {
                 continue;
             }
 
-            if (!studentService.ktmkc(id, oldPassword)) {
-                System.out.println("Mật khẩu cũ không đúng!");
-                continue;
+            if (studentService.ktmkc(id, oldPassword)) {
+                break;
             }
-
-            break;
+            System.out.println("Mật khẩu cũ không đúng!");
         }
 
         String newPassword;
