@@ -7,6 +7,7 @@ import model.Student;
 import presentation.ConsoleTable;
 
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import java.util.Scanner;
@@ -87,12 +88,18 @@ public class StatisticView {
                 ));
 
         System.out.println("======================= THỐNG KÊ ===========================");
+        AtomicInteger i = new AtomicInteger();
+        ConsoleTable.printLine(60);
 
-        ConsoleTable.courseStatisticHeader();
+        System.out.printf("| %-4s | %-35s | %-12s |%n",
+                "STT",
+                "Tên khóa học",
+                "Học viên");
 
+        ConsoleTable.printLine(60);
         totalStudent.forEach((courseName, total) ->
                 ConsoleTable.courseStatisticRow(
-                        0,
+                        i.getAndIncrement(),
                         courseName,
                         total
                 ));
@@ -144,7 +151,7 @@ public class StatisticView {
         ConsoleTable.courseStatisticHeader();
 
         courseService.getAllCourse().stream()
-                .filter(course -> totalStudent.getOrDefault(course.getName(), 0L) >= 10)
+                .filter(course -> totalStudent.getOrDefault(course.getName(), 0L) > 10)
                 .forEach(course ->
                         ConsoleTable.courseStatisticRow(
                                 course.getId(),
