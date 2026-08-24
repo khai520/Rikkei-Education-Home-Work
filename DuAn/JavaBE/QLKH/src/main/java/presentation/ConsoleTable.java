@@ -144,7 +144,7 @@ public class ConsoleTable {
             System.out.printf("Trang %d/%d%n", currentPage, totalPage);
             System.out.println("[P] Trang trước");
             System.out.println("[N] Trang sau");
-            System.out.println("[0] Quay lại");
+            System.out.println("[0] Xem trang");
             System.out.print("Chọn: ");
 
             String input = sc.nextLine().trim().toUpperCase();
