@@ -15,9 +15,13 @@ import java.time.LocalDateTime;
 public class Mentors {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "mentor_id")
-    private long id;
+    private Long id;
+
+    @OneToOne
+    @MapsId
+    @JoinColumn(name = "mentor_id")
+    private Users user;
 
     @Column(name = "department" , length = 100)
     private String department;

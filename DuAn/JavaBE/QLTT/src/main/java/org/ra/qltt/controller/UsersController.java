@@ -1,23 +1,66 @@
 package org.ra.qltt.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.ra.qltt.model.dto.request.UserRequestDTO;
 import org.ra.qltt.model.dto.response.ResponseWrapper;
 import org.ra.qltt.model.dto.response.UserResponseDTO;
 import org.ra.qltt.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
+@RequestMapping("/api/users")
 @RequiredArgsConstructor
 public class UsersController {
     private final UserService userService;
 
-    @RequestMapping("/api/auth/{id}")
-    public ResponseEntity<?> me(@PathVariable Long id) {
-        UserResponseDTO userResponseDTO = userService.findUserById(id);
-        return new ResponseEntity<>(ResponseWrapper.success(userResponseDTO , "Lấy dữ liệu thành công",HttpStatus.OK.value()), HttpStatus.OK);
+    @GetMapping
+    public ResponseEntity<?> getUsers(@RequestParam(name = "roles", required = false) String roles){
+        List<UserResponseDTO> users = userService.getUsers();
+        if(roles != null && !roles.trim().isEmpty()){
+            users = users.stream().filter(user -> user.getRole().contains(roles)).collect(Collectors.toList());
+        }
+        return ResponseEntity.ok(ResponseWrapper.success(users,"Lấy danh sách thành công" ,HttpStatus.OK.value()));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getUser(@PathVariable Long id){
+        UserResponseDTO user = userService.findUserById(id);
+        return ResponseEntity.ok(ResponseWrapper.success(user,"Lấy dữ liệu thành công" ,HttpStatus.OK.value()));
+    }
+
+    @PostMapping
+    public ResponseEntity<?> createUser(@Valid @RequestBody UserRequestDTO userRequestDTO){
+        UserResponseDTO user = userService.createUser(userRequestDTO);
+        return ResponseEntity.ok(ResponseWrapper.success(user,"Thêm mới thành công",HttpStatus.CREATED.value()));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateUser(@Valid @RequestBody UserRequestDTO userRequestDTO , @PathVariable Long id){
+        UserResponseDTO user = userService.updateUser(userRequestDTO,id);
+        return ResponseEntity.ok(ResponseWrapper.success(user,"Sửa dữ liệu thành công",HttpStatus.OK.value()));
+    }
+
+    @PutMapping("/{id}/status")
+    public ResponseEntity<?> updateUserStatus(@PathVariable Long id){
+        UserResponseDTO user = userService.updateUserStatus(id);
+        return ResponseEntity.ok(ResponseWrapper.success(user,"Sửa dữ liệu thành công",HttpStatus.OK.value()));
+    }
+
+    @PutMapping("/{id}/role")
+    public ResponseEntity<?> updateUserRole(@PathVariable Long id){
+        UserResponseDTO user = userService.updateUserRole(id);
+        return ResponseEntity.ok(ResponseWrapper.success(user,"Sửa dữ liệu thành công",HttpStatus.OK.value()));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteUser(@PathVariable Long id){
+        userService.deleteUser(id);
+        return ResponseEntity.ok(ResponseWrapper.success(null,"Xóa dữ liệu thành công",HttpStatus.OK.value()));
     }
 }

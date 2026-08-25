@@ -57,4 +57,9 @@ public class Users {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
+    public enum UserRole {
+        ADMIN,
+        MENTOR,
+        STUDENT
+    }
 }
