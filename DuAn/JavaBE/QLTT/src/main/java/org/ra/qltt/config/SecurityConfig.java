@@ -38,7 +38,7 @@ public class SecurityConfig {
                     auth.requestMatchers(HttpMethod.POST, "/api/auth/login")
                             .permitAll();
 
-                    auth.requestMatchers(HttpMethod.GET, "/api/auth/{id}")
+                    auth.requestMatchers(HttpMethod.GET, "/api/auth/me")
                             .hasAnyRole("ADMIN", "MENTOR", "STUDENT");
 
 

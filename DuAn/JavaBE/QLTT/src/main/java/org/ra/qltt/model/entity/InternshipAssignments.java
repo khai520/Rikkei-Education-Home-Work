@@ -35,6 +35,12 @@ public class InternshipAssignments {
     @OneToMany(mappedBy = "assignment")
     private List<AssessmentResults> assessmentResults;
 
+    @Column(name = "assigned_date")
+    private LocalDateTime assignedDate;
+
+    @Column(name = "status")
+    private String status;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -51,5 +57,12 @@ public class InternshipAssignments {
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
+    }
+
+    public enum AssignmentStatus {
+        PENDING,
+        IN_PROGRESS,
+        COMPLETED,
+        CANCELLED
     }
 }

@@ -42,6 +42,9 @@ public class AssessmentResults {
     @Column(name = "comments", columnDefinition = "TEXT")
     private String comment;
 
+    @Column(name = "evaluation_date")
+    private LocalDateTime evaluationDate;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

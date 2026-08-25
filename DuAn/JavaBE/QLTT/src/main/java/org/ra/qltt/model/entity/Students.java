@@ -16,23 +16,32 @@ import java.time.LocalDateTime;
 public class Students {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name ="student_id")
-    private long id;
+    @Column(name = "student_id")
+    private Long id;
 
-    @Column(name = "student_code" , length = 20, nullable = false, unique = true)
+    @OneToOne
+    @MapsId
+    @JoinColumn(name = "student_id")
+    private Users user;
+
+    @Column(
+            name = "student_code",
+            length = 20,
+            nullable = false,
+            unique = true
+    )
     private String studentCode;
 
-    @Column(name = "major" , length = 100 )
+    @Column(name = "major", length = 100)
     private String major;
 
-    @Column(name = "class" , length = 50)
-    private String clas;
+    @Column(name = "class", length = 50)
+    private String className;
 
-    @Column(name = "date_of_birth" )
-    private LocalDate  dob;
+    @Column(name = "date_of_birth")
+    private LocalDate dob;
 
-    @Column(name = "address")
+    @Column(name = "address", length = 255)
     private String address;
 
     @Column(name = "created_at", nullable = false, updatable = false)

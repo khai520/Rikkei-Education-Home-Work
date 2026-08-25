@@ -212,7 +212,3 @@ CREATE INDEX idx_results_criterion_id
 
 CREATE INDEX idx_results_evaluated_by
     ON assessment_results(evaluated_by);
-
-SELECT username, password_hash, email, full_name, role, is_active
-FROM users
-WHERE username = 'admin';
