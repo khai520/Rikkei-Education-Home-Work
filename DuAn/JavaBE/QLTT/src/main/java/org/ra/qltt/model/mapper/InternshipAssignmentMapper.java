@@ -12,6 +12,21 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface InternshipAssignmentMapper {
 
+    @Mapping(source = "id" ,target = "assignmentId")
+
+
+    // Student
+    @Mapping(source = "student.id" ,target = "studentId")
+    @Mapping(source = "student.studentCode" ,target = "studentCode")
+    @Mapping(source = "student.user.fullName" , target = "studentName")
+
+    // Mentor
+    @Mapping(source = "mentor.id" ,target = "mentorId")
+    @Mapping(source = "mentor.user.fullName" , target = "mentorName")
+
+    // Phase
+    @Mapping(source = "phase.id" , target = "phaseId")
+    @Mapping(source = "phase.phaseName" , target = "phaseName")
     InternshipAssignmentResponseDTO assignmentToResponseDTO(
             InternshipAssignments assignment
     );

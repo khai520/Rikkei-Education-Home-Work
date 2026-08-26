@@ -9,9 +9,18 @@ import org.ra.qltt.model.entity.AssessmentRounds;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring")
+@Mapper(
+        componentModel = "spring",
+        uses = AssessmentRoundCriterionMapper.class
+)
 public interface AssessmentRoundMapper {
 
+    // Phases
+    @Mapping(source = "phases.id" , target = "phaseId")
+    @Mapping(source = "phases.phaseName" , target = "phaseName")
+
+    @Mapping(source = "roundCriteria" , target = "criteria")
+    @Mapping(source = "id" , target = "roundId")
     AssessmentRoundResponseDTO roundToResponseDTO(
             AssessmentRounds round
     );
@@ -34,4 +43,6 @@ public interface AssessmentRoundMapper {
             AssessmentRoundRequestDTO request,
             @MappingTarget AssessmentRounds round
     );
+
+
 }

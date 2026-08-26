@@ -5,6 +5,7 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -25,8 +26,12 @@ public class AssessmentRounds {
     @JoinColumn(name = "phase_id" ,  nullable = false)
     private InternshipPhases phases;
 
-    @OneToMany(mappedBy = "round")
-    private List<RoundCriteria> roundCriteria;
+    @OneToMany(
+            mappedBy = "round",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<RoundCriteria> roundCriteria = new ArrayList<>();
 
     @OneToMany(mappedBy = "round")
     private List<AssessmentResults> assessmentResults;

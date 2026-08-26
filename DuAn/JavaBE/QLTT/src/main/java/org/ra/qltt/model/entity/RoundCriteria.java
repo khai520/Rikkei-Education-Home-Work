@@ -21,11 +21,17 @@ public class RoundCriteria {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "round_id", nullable = false)
+    @JoinColumn(
+            name = "round_id",
+            nullable = false
+    )
     private AssessmentRounds round;
 
     @ManyToOne
-    @JoinColumn(name = "criterion_id", nullable = false)
+    @JoinColumn(
+            name = "criterion_id",
+            nullable = false
+    )
     private EvaluationCriteria criterion;
 
     @Column(name = "weight", nullable = false , precision = 5 , scale = 2)

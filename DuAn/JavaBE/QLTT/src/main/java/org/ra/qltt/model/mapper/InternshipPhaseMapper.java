@@ -12,6 +12,7 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface InternshipPhaseMapper {
 
+    @Mapping(source = "id" , target = "phaseId")
     InternshipPhaseResponseDTO internshipPhaseToResponseDTO(
             InternshipPhases phase
     );

@@ -1,9 +1,11 @@
 package org.ra.qltt.model.dto.response;
 
 import lombok.Data;
+import org.ra.qltt.model.dto.request.RoundCriterionRequestDTO;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 public class AssessmentRoundResponseDTO {
@@ -21,4 +23,6 @@ public class AssessmentRoundResponseDTO {
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    private List<AssessmentRoundCriterionDTO> criteria;
 }

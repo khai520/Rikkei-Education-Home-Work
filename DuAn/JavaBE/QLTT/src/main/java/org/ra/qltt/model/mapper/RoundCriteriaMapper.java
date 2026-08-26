@@ -11,7 +11,22 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface RoundCriteriaMapper {
-
+    @Mapping(
+            target = "criterionId",
+            source = "criterion.id"
+    )
+    @Mapping(
+            target = "criterionName",
+            source = "criterion.criteriaName"
+    )
+    @Mapping(
+            target = "roundId",
+            source = "round.id"
+    )
+    @Mapping(
+            target = "roundName",
+            source = "round.roundName"
+    )
     RoundCriterionResponseDTO roundCriteriaToResponseDTO(
             RoundCriteria roundCriteria
     );
