@@ -1,5 +1,6 @@
 package org.ra.qltt.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.ra.qltt.model.dto.request.AssessmentRoundRequestDTO;
 import org.ra.qltt.model.dto.response.AssessmentRoundResponseDTO;
@@ -34,13 +35,13 @@ public class AssessmentRoundsController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createAR(@RequestBody AssessmentRoundRequestDTO assessmentRoundRequestDTO){
+    public ResponseEntity<?> createAR(@Valid @RequestBody AssessmentRoundRequestDTO assessmentRoundRequestDTO){
         AssessmentRoundResponseDTO assessmentRoundResponseDTO = assessmentRoundsService.createAR(assessmentRoundRequestDTO);
         return ResponseEntity.ok(ResponseWrapper.success(assessmentRoundResponseDTO,"Thêm mới thành công",HttpStatus.CREATED.value()));
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<?> updateAR(@RequestBody AssessmentRoundRequestDTO assessmentRoundRequestDTO, @PathVariable Long id){
+    public ResponseEntity<?> updateAR(@Valid @RequestBody AssessmentRoundRequestDTO assessmentRoundRequestDTO, @PathVariable Long id){
         AssessmentRoundResponseDTO assessmentRoundResponseDTO = assessmentRoundsService.updateAR(assessmentRoundRequestDTO , id);
         return ResponseEntity.ok(ResponseWrapper.success(assessmentRoundResponseDTO,"Sửa dữ liệu thành công",HttpStatus.OK.value()));
     }

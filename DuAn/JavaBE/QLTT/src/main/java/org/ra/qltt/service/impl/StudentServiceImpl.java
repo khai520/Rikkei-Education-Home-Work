@@ -60,7 +60,7 @@ public class StudentServiceImpl implements StudentService {
         assert user != null;
         students = studentRepository.findById(id).orElseThrow(() ->{
             String errorMessage = messageSourceConfig.messageSource()
-                    .getMessage("error.resource.not_found", new Object[]{"User", id}, LocaleContextHolder.getLocale());
+                    .getMessage("error.resource.not_found", new Object[]{"Student", id}, LocaleContextHolder.getLocale());
             return new ResourceNotFoundException(errorMessage);
         });
         if ("STUDENT".equals(user.getRole()) && user.getId() != id ) {
@@ -79,7 +79,7 @@ public class StudentServiceImpl implements StudentService {
                     String errorMessage = messageSourceConfig.messageSource()
                             .getMessage(
                                     "error.resource.not_found",
-                                    new Object[]{"User", studentRequestDTO.getUserId()},
+                                    new Object[]{"Student", studentRequestDTO.getUserId()},
                                     LocaleContextHolder.getLocale()
                             );
 

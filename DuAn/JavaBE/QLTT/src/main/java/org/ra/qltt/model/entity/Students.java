@@ -41,7 +41,7 @@ public class Students {
     @Column(name = "date_of_birth")
     private LocalDate dob;
 
-    @Column(name = "address", length = 255)
+    @Column(name = "address")
     private String address;
 
     @Column(name = "created_at", nullable = false, updatable = false)

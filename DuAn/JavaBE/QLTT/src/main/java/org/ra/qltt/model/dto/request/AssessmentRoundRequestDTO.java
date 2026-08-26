@@ -6,10 +6,12 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import org.ra.qltt.validation.ValidDateRange;
 
 import java.time.LocalDate;
 import java.util.List;
 
+@ValidDateRange
 @Data
 public class AssessmentRoundRequestDTO {
 
@@ -17,7 +19,7 @@ public class AssessmentRoundRequestDTO {
     private Long phaseId;
 
     @NotBlank(message = "Tên đợt đánh giá không được để trống")
-    @Size(max = 100)
+    @Size(max = 100, message = "Tên đợt đánh giá không được vượt quá 100 ký tự")
     private String roundName;
 
     @NotNull(message = "Ngày bắt đầu không được để trống")

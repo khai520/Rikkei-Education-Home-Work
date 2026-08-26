@@ -32,7 +32,7 @@ public class EvaluationCriteriaServiceImpl implements EvaluationCriteriaService 
     public EvaluationCriterionResponseDTO getECById(Long id) {
         EvaluationCriteria evaluationCriteria = evaluationCriteriaRepository.findById(id).orElseThrow(() -> {
             String errorMessage = messageSourceConfig.messageSource()
-                    .getMessage("error.resource.not_found", new Object[]{"User", id}, LocaleContextHolder.getLocale());
+                    .getMessage("error.resource.not_found", new Object[]{"EvaluationCriteria", id}, LocaleContextHolder.getLocale());
             return new ResourceNotFoundException(errorMessage);
         });
         return evaluationCriterionMapper.criterionToResponseDTO(evaluationCriteria);
@@ -49,7 +49,7 @@ public class EvaluationCriteriaServiceImpl implements EvaluationCriteriaService 
     public EvaluationCriterionResponseDTO updateEC(EvaluationCriterionRequestDTO evaluationCriterionRequestDTO, Long id) {
         EvaluationCriteria evaluationCriteria = evaluationCriteriaRepository.findById(id).orElseThrow(() -> {
             String errorMessage = messageSourceConfig.messageSource()
-                    .getMessage("error.resource.not_found", new Object[]{"User", id}, LocaleContextHolder.getLocale());
+                    .getMessage("error.resource.not_found", new Object[]{"EvaluationCriteria", id}, LocaleContextHolder.getLocale());
             return new ResourceNotFoundException(errorMessage);
         });
         evaluationCriterionMapper.updateCriterion(evaluationCriterionRequestDTO, evaluationCriteria);
@@ -61,7 +61,7 @@ public class EvaluationCriteriaServiceImpl implements EvaluationCriteriaService 
     public void deleteEC(Long id) {
         EvaluationCriteria evaluationCriteria = evaluationCriteriaRepository.findById(id).orElseThrow(() -> {
             String errorMessage = messageSourceConfig.messageSource()
-                    .getMessage("error.resource.not_found", new Object[]{"User", id}, LocaleContextHolder.getLocale());
+                    .getMessage("error.resource.not_found", new Object[]{"EvaluationCriteria", id}, LocaleContextHolder.getLocale());
             return new ResourceNotFoundException(errorMessage);
         });
         evaluationCriteriaRepository.delete(evaluationCriteria);

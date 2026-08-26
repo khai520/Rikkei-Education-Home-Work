@@ -32,7 +32,7 @@ public class InternshipPhasesServiceImpl implements InternshipPhasesService {
     public InternshipPhaseResponseDTO getIPById(Long id) {
         InternshipPhases internshipPhases = IPR.findById(id).orElseThrow(() -> {
             String errorMessage = messageSourceConfig.messageSource()
-                    .getMessage("error.resource.not_found", new Object[]{"User", id}, LocaleContextHolder.getLocale());
+                    .getMessage("error.resource.not_found", new Object[]{"InternshipPhases", id}, LocaleContextHolder.getLocale());
             return new ResourceNotFoundException(errorMessage);
         });
 
@@ -50,7 +50,7 @@ public class InternshipPhasesServiceImpl implements InternshipPhasesService {
     public InternshipPhaseResponseDTO updateIP(InternshipPhaseRequestDTO internshipPhaseRequestDTO , Long id) {
         InternshipPhases internshipPhases = IPR.findById(id).orElseThrow(() ->{
             String errorMessage = messageSourceConfig.messageSource()
-                    .getMessage("error.resource.not_found", new Object[]{"User", id}, LocaleContextHolder.getLocale());
+                    .getMessage("error.resource.not_found", new Object[]{"InternshipPhases", id}, LocaleContextHolder.getLocale());
             return new ResourceNotFoundException(errorMessage);
         });
         internshipPhaseMapper.updateInternshipPhase(internshipPhaseRequestDTO , internshipPhases);
@@ -62,7 +62,7 @@ public class InternshipPhasesServiceImpl implements InternshipPhasesService {
     public void deleteIP(Long id) {
         InternshipPhases internshipPhases = IPR.findById(id).orElseThrow(() ->{
             String errorMessage = messageSourceConfig.messageSource()
-                    .getMessage("error.resource.not_found", new Object[]{"User", id}, LocaleContextHolder.getLocale());
+                    .getMessage("error.resource.not_found", new Object[]{"InternshipPhases", id}, LocaleContextHolder.getLocale());
             return new ResourceNotFoundException(errorMessage);
         });
         IPR.delete(internshipPhases);

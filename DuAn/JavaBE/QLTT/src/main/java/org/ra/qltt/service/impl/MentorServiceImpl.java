@@ -40,7 +40,7 @@ public class MentorServiceImpl implements MentorService {
         assert users != null;
         Mentors mentor = mentorRepository.findById(id).orElseThrow(() ->{
             String errorMessage = messageSourceConfig.messageSource()
-                    .getMessage("error.resource.not_found", new Object[]{"User", id}, LocaleContextHolder.getLocale());
+                    .getMessage("error.resource.not_found", new Object[]{"Mentors", id}, LocaleContextHolder.getLocale());
             return new ResourceNotFoundException(errorMessage);
         });
         if ("MENTOR".equals(users.getRole()) && users.getId() != id) {
@@ -58,7 +58,7 @@ public class MentorServiceImpl implements MentorService {
                     String errorMessage = messageSourceConfig.messageSource()
                             .getMessage(
                                     "error.resource.not_found",
-                                    new Object[]{"User", mentorRequestDTO.getUserId()},
+                                    new Object[]{"Mentors", mentorRequestDTO.getUserId()},
                                     LocaleContextHolder.getLocale()
                             );
 

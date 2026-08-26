@@ -6,7 +6,6 @@ import org.ra.qltt.model.dto.request.UserLoginDTO;
 import org.ra.qltt.model.dto.response.ResponseWrapper;
 import org.ra.qltt.model.dto.response.UserLoginResponseDTO;
 import org.ra.qltt.model.dto.response.UserResponseDTO;
-import org.ra.qltt.repository.UserRepository;
 import org.ra.qltt.service.AuthService;
 import org.ra.qltt.service.UserService;
 import org.springframework.context.i18n.LocaleContextHolder;

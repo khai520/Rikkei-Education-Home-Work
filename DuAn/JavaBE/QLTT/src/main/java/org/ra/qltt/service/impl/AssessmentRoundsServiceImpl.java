@@ -47,7 +47,7 @@ public class AssessmentRoundsServiceImpl implements AssessmentRoundsService {
     public AssessmentRoundResponseDTO getARById(Long id) {
         AssessmentRounds assessmentRounds = assessmentRoundsRepository.findById(id).orElseThrow(() -> {
             String errorMessage = messageSourceConfig.messageSource()
-                    .getMessage("error.resource.not_found", new Object[]{"User", id}, LocaleContextHolder.getLocale());
+                    .getMessage("error.resource.not_found", new Object[]{"AssessmentRounds", id}, LocaleContextHolder.getLocale());
             return new ResourceNotFoundException(errorMessage);
         });
         return assessmentRoundMapper.roundToResponseDTO(assessmentRounds);
@@ -77,15 +77,6 @@ public class AssessmentRoundsServiceImpl implements AssessmentRoundsService {
                                                 + assessmentRoundRequestDTO.getPhaseId()
                                 )
                         );
-
-
-        if (assessmentRoundRequestDTO.getCriteria() == null
-                || assessmentRoundRequestDTO.getCriteria().isEmpty()) {
-
-            throw new IllegalArgumentException(
-                    "Đợt đánh giá phải có ít nhất một tiêu chí"
-            );
-        }
 
 
         Set<Long> criterionIds = new HashSet<>();
@@ -214,14 +205,6 @@ public class AssessmentRoundsServiceImpl implements AssessmentRoundsService {
                                 )
                         );
 
-
-        if (request.getCriteria() == null
-                || request.getCriteria().isEmpty()) {
-
-            throw new IllegalArgumentException(
-                    "Đợt đánh giá phải có ít nhất một tiêu chí"
-            );
-        }
 
 
         Set<Long> criterionIds = new HashSet<>();

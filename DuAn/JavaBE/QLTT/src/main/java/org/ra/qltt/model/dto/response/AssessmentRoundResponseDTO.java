@@ -1,7 +1,6 @@
 package org.ra.qltt.model.dto.response;
 
 import lombok.Data;
-import org.ra.qltt.model.dto.request.RoundCriterionRequestDTO;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
