@@ -3,7 +3,7 @@ package org.ra.qltt.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.ra.qltt.model.dto.request.StudentRequestDTO;
-import org.ra.qltt.model.dto.response.ResponseWrapper;
+import org.ra.qltt.exception.ResponseWrapper;
 import org.ra.qltt.model.dto.response.StudentResponseDTO;
 import org.ra.qltt.service.StudentService;
 import org.springframework.http.HttpStatus;
@@ -21,19 +21,19 @@ public class StudentController {
     @GetMapping
     public ResponseEntity<?> getStudents() {
         List<StudentResponseDTO> students = studentService.getStudents();
-        return ResponseEntity.ok(ResponseWrapper.success(students,"Lấy danh sách thành công" , HttpStatus.OK.value()));
+        return ResponseEntity.ok(ResponseWrapper.success(students,"success.resource.all" , HttpStatus.OK.value()));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getStudent(@PathVariable Long id){
         StudentResponseDTO student = studentService.getStudentByID(id);
-        return ResponseEntity.ok(ResponseWrapper.success(student,"Lấy dữ liệu thành công" , HttpStatus.OK.value()));
+        return ResponseEntity.ok(ResponseWrapper.success(student,"success.resource.find" , HttpStatus.OK.value()));
     }
 
     @PostMapping
     public ResponseEntity<?> saveStudent(@Valid @RequestBody StudentRequestDTO studentRequestDTO){
         StudentResponseDTO studentResponseDTO = studentService.createStudent(studentRequestDTO);
-        return ResponseEntity.ok(ResponseWrapper.success(studentResponseDTO,"Thêm mới thành công",HttpStatus.CREATED.value()));
+        return ResponseEntity.ok(ResponseWrapper.success(studentResponseDTO,"success.resource.create",HttpStatus.CREATED.value()));
     }
 
     @PutMapping("/{studentId}")
@@ -48,7 +48,7 @@ public class StudentController {
         return ResponseEntity.ok(
                 ResponseWrapper.success(
                         student,
-                        "Cập nhật thông tin sinh viên thành công",
+                        "success.resource.update",
                         HttpStatus.OK.value()
                 )
         );

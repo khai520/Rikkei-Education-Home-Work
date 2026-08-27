@@ -4,7 +4,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
-import org.ra.qltt.model.entity.Users;
+import org.ra.qltt.model.dto.enums.UserRole;
 
 @Data
 public class UserRequestDTO {
@@ -27,7 +27,7 @@ public class UserRequestDTO {
     @Size(max = 20)
     private String phoneNumber;
 
-    private Users.UserRole role;
+    private UserRole role;
 
     private boolean active;
 }

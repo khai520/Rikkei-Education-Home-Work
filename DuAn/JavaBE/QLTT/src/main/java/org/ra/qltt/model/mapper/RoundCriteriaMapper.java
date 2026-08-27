@@ -12,6 +12,10 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface RoundCriteriaMapper {
     @Mapping(
+            target = "roundCriterionId",
+            source = "id"
+    )
+    @Mapping(
             target = "criterionId",
             source = "criterion.id"
     )
@@ -27,15 +31,21 @@ public interface RoundCriteriaMapper {
             target = "roundName",
             source = "round.roundName"
     )
+    @Mapping(
+            target = "maxScore",
+            source = "criterion.maxScore"
+    )
     RoundCriterionResponseDTO roundCriteriaToResponseDTO(
             RoundCriteria roundCriteria
     );
 
-    List<RoundCriterionResponseDTO> roundCriteriasToResponseDTOs(
-            List<RoundCriteria> roundCriterias
+    List<RoundCriterionResponseDTO> roundCriteriaToResponseDTOs(
+            List<RoundCriteria> roundCriteria
     );
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "round" , ignore = true)
+    @Mapping(target = "criterion" , ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     RoundCriteria requestToRoundCriteria(
@@ -43,6 +53,8 @@ public interface RoundCriteriaMapper {
     );
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "round" , ignore = true)
+    @Mapping(target = "criterion" , ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     void updateRoundCriteria(

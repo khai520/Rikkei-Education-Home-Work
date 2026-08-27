@@ -25,6 +25,6 @@ public interface AssessmentRoundCriterionMapper {
             RoundCriteria roundCriteria
     );
 
-    List<AssessmentRoundCriterionDTO> roundCriteriasToResponseDTOs(
+    List<AssessmentRoundCriterionDTO> roundCriteriaToResponseDTOs(
             List<RoundCriteria> roundCriteria);
 }

@@ -20,7 +20,7 @@ public class StudentRequestDTO {
     @Size(max = 50)
     private String className;
 
-    private LocalDate dateOfBirth;
+    private LocalDate dob;
 
     @Size(max = 255)
     private String address;

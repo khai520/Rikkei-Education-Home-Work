@@ -22,6 +22,7 @@ public interface InternshipPhaseMapper {
     );
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "assessmentRounds", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     InternshipPhases requestToInternshipPhase(
@@ -29,6 +30,7 @@ public interface InternshipPhaseMapper {
     );
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "assessmentRounds", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     void updateInternshipPhase(

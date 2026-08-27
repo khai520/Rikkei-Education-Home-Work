@@ -9,7 +9,8 @@ import java.time.LocalDateTime;
 public class EvaluationCriterionResponseDTO {
 
     private Long criterionId;
-    private String criterionName;
+    private String criteriaName;
+
     private String description;
     private BigDecimal maxScore;
 

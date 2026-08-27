@@ -28,6 +28,7 @@ public interface MentorMapper {
     );
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "user", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     Mentors mentorRequestToMentors(
@@ -35,6 +36,7 @@ public interface MentorMapper {
     );
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "user", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     void updateMentorFromDTO(

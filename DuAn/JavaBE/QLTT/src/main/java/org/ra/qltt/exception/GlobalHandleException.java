@@ -1,7 +1,6 @@
 package org.ra.qltt.exception;
 
 import lombok.RequiredArgsConstructor;
-import org.ra.qltt.model.dto.response.ResponseWrapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -90,6 +89,25 @@ public class GlobalHandleException {
                 );
     }
 
+    /**
+     * UNIQUE
+     */
+    @ExceptionHandler(ResourceAlreadyExistsException.class)
+    public ResponseEntity<ResponseWrapper<Void>>
+        handleResourceAlreadyExistsException(
+            ResourceNotFoundException e
+    ) {
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(
+                        ResponseWrapper.error(
+                                null,
+                                e.getMessage(),
+                                HttpStatus.BAD_REQUEST.value()
+                        )
+                );
+    }
 
     /**
      * Không có quyền thực hiện

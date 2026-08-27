@@ -3,7 +3,7 @@ package org.ra.qltt.controller;
 import lombok.RequiredArgsConstructor;
 import org.ra.qltt.config.MessageSourceConfig;
 import org.ra.qltt.model.dto.request.UserLoginDTO;
-import org.ra.qltt.model.dto.response.ResponseWrapper;
+import org.ra.qltt.exception.ResponseWrapper;
 import org.ra.qltt.model.dto.response.UserLoginResponseDTO;
 import org.ra.qltt.model.dto.response.UserResponseDTO;
 import org.ra.qltt.service.AuthService;
@@ -46,7 +46,7 @@ public class AuthController {
         return new ResponseEntity<>(
                 ResponseWrapper.success(
                         userResponseDTO,
-                        "Lấy dữ liệu thành công",
+                        "success.resource.find",
                         HttpStatus.OK.value()
                 ),
                 HttpStatus.OK

@@ -2,15 +2,15 @@ package org.ra.qltt.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.ra.qltt.config.MessageSourceConfig;
 import org.ra.qltt.exception.ResourceNotFoundException;
+import org.ra.qltt.exception.ResponseWrapper;
+import org.ra.qltt.model.dto.enums.UserRole;
 import org.ra.qltt.model.dto.request.UserRequestDTO;
 import org.ra.qltt.model.dto.response.UserResponseDTO;
 import org.ra.qltt.model.entity.Users;
 import org.ra.qltt.model.mapper.UserMapper;
 import org.ra.qltt.repository.UserRepository;
 import org.ra.qltt.service.UserService;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +22,6 @@ import java.util.List;
 @Slf4j
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
-    private final MessageSourceConfig messageSourceConfig;
     private final UserMapper userMapper;
 
     @Override
@@ -33,22 +32,18 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDTO findUserById(Long id) {
-        Users user = userRepository.findById(id).orElseThrow(() -> {
-            String errorMessage = messageSourceConfig.messageSource()
-                    .getMessage("error.resource.not_found", new Object[]{"User", id}, LocaleContextHolder.getLocale());
-            return new ResourceNotFoundException(errorMessage);
-        });
+        Users user = userRepository.findById(id).orElseThrow(() ->
+            new ResourceNotFoundException(ResponseWrapper.getMessage("error.user.not_found"))
+        );
 
         return userMapper.userToUserResponseDTO(user);
     }
 
     @Override
     public UserResponseDTO findUserByUserName(String username) {
-        Users user = userRepository.findByUsername(username).orElseThrow(()-> {
-            String errorMessage = messageSourceConfig.messageSource()
-                    .getMessage("error.resource.not_found", new Object[]{"User", username}, LocaleContextHolder.getLocale());
-            return new ResourceNotFoundException(errorMessage);
-        });
+        Users user = userRepository.findByUsername(username).orElseThrow(()->
+            new ResourceNotFoundException(ResponseWrapper.getMessage("error.user.not_found"))
+        );
         return userMapper.userToUserResponseDTO(user);
     }
 
@@ -63,11 +58,9 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserResponseDTO updateUser(UserRequestDTO userRequestDTO , Long id) {
-        Users user = userRepository.findById(id).orElseThrow(() ->{
-            String errorMessage = messageSourceConfig.messageSource()
-                    .getMessage("error.resource.not_found", new Object[]{"User", id}, LocaleContextHolder.getLocale());
-            return new ResourceNotFoundException(errorMessage);
-        });
+        Users user = userRepository.findById(id).orElseThrow(() ->
+                new ResourceNotFoundException(ResponseWrapper.getMessage("error.user.not_found"))
+        );
         userMapper.updateUserFromDTO(userRequestDTO, user);
         Users updatedUser = userRepository.save(user);
 
@@ -76,11 +69,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDTO updateUserStatus(Long id) {
-        Users user = userRepository.findById(id).orElseThrow(() ->{
-            String errorMessage = messageSourceConfig.messageSource()
-                    .getMessage("error.resource.not_found", new Object[]{"User", id}, LocaleContextHolder.getLocale());
-            return new ResourceNotFoundException(errorMessage);
-        });
+        Users user = userRepository.findById(id).orElseThrow(() ->
+            new ResourceNotFoundException(ResponseWrapper.getMessage("error.user.not_found"))
+        );
         user.setActive(!user.isActive());
         Users updatedUser = userRepository.save(user);
         return userMapper.userToUserResponseDTO(updatedUser);
@@ -89,16 +80,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponseDTO updateUserRole(Long id) {
         Users user = userRepository.findById(id)
-                .orElseThrow(() -> {
-                    String errorMessage = messageSourceConfig.messageSource()
-                            .getMessage(
-                                    "error.resource.not_found",
-                                    new Object[]{"User", id},
-                                    LocaleContextHolder.getLocale()
-                            );
-
-                    return new ResourceNotFoundException(errorMessage);
-                });
+                .orElseThrow(() ->
+                    new ResourceNotFoundException(ResponseWrapper.getMessage("error.user.not_found"))
+                );
         if ("ADMIN".equals(user.getRole())
                 && !user.getUsername().equals(user.getRole())) {
 
@@ -111,7 +95,7 @@ public class UserServiceImpl implements UserService {
                     "Không được tự thay đổi vai trò của chính mình"
             );
         }
-        user.setRole(user.getRole().contains(Users.UserRole.STUDENT.name()) ? Users.UserRole.MENTOR.name() : Users.UserRole.STUDENT.name());
+        user.setRole(user.getRole().contains(UserRole.STUDENT.name()) ? UserRole.MENTOR.name() : UserRole.STUDENT.name());
 
         Users updatedUser = userRepository.save(user);
 
@@ -122,16 +106,9 @@ public class UserServiceImpl implements UserService {
     public void deleteUser(Long id) {
 
         Users user = userRepository.findById(id)
-                .orElseThrow(() -> {
-                    String errorMessage = messageSourceConfig.messageSource()
-                            .getMessage(
-                                    "error.resource.not_found",
-                                    new Object[]{"User", id},
-                                    LocaleContextHolder.getLocale()
-                            );
-
-                    return new ResourceNotFoundException(errorMessage);
-                });
+                .orElseThrow(() ->
+                    new ResourceNotFoundException(ResponseWrapper.getMessage("error.user.not_found"))
+                );
 
         userRepository.delete(user);
 

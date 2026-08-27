@@ -26,6 +26,7 @@ public class AssessmentRounds {
     @JoinColumn(name = "phase_id" ,  nullable = false)
     private InternshipPhases phases;
 
+    @Builder.Default
     @OneToMany(
             mappedBy = "round",
             cascade = CascadeType.ALL,

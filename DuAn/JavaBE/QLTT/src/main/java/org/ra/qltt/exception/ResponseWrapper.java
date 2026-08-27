@@ -1,6 +1,10 @@
-package org.ra.qltt.model.dto.response;
+package org.ra.qltt.exception;
 
 import lombok.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
@@ -9,6 +13,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Builder
+@Component
 public class ResponseWrapper<T> {
 
     private int httpCode;
@@ -23,15 +28,22 @@ public class ResponseWrapper<T> {
 
     private LocalDateTime time;
 
+    private static MessageSource messageSource;
+
+    @Autowired
+    public void setMessageSource(MessageSource messageSource) {
+        ResponseWrapper.messageSource = messageSource;
+    }
+
     public static <T> ResponseWrapper<T> success(
             T data,
-            String message,
+            String messageKey,
             int httpCode
     ) {
         return ResponseWrapper.<T>builder()
                 .httpCode(httpCode)
                 .success(true)
-                .message(message)
+                .message(getMessage(messageKey))
                 .data(data)
                 .errors(null)
                 .time(LocalDateTime.now())
@@ -40,16 +52,24 @@ public class ResponseWrapper<T> {
 
     public static <T> ResponseWrapper<T> error(
             T errors,
-            String message,
+            String messageKey,
             int httpCode
     ) {
         return ResponseWrapper.<T>builder()
                 .httpCode(httpCode)
                 .success(false)
-                .message(message)
+                .message(getMessage(messageKey))
                 .data(null)
                 .errors(errors)
                 .time(LocalDateTime.now())
                 .build();
+    }
+
+    public static String getMessage(String messageKey) {
+        return messageSource.getMessage(
+                messageKey,
+                null,
+                LocaleContextHolder.getLocale()
+        );
     }
 }

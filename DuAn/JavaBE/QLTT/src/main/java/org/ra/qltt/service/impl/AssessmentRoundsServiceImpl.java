@@ -1,8 +1,8 @@
 package org.ra.qltt.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.ra.qltt.config.MessageSourceConfig;
 import org.ra.qltt.exception.ResourceNotFoundException;
+import org.ra.qltt.exception.ResponseWrapper;
 import org.ra.qltt.model.dto.request.AssessmentRoundRequestDTO;
 import org.ra.qltt.model.dto.request.RoundCriterionRequestDTO;
 import org.ra.qltt.model.dto.response.AssessmentRoundResponseDTO;
@@ -14,9 +14,7 @@ import org.ra.qltt.model.mapper.AssessmentRoundMapper;
 import org.ra.qltt.repository.AssessmentRoundsRepository;
 import org.ra.qltt.repository.EvaluationCriteriaRepository;
 import org.ra.qltt.repository.InternshipPhasesRepository;
-import org.ra.qltt.repository.RoundCriteriaRepository;
 import org.ra.qltt.service.AssessmentRoundsService;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,10 +30,9 @@ public class AssessmentRoundsServiceImpl implements AssessmentRoundsService {
 
     private final AssessmentRoundsRepository assessmentRoundsRepository;
     private final AssessmentRoundMapper assessmentRoundMapper;
-    private final MessageSourceConfig messageSourceConfig;
     private final InternshipPhasesRepository internshipPhasesRepository;
     private final EvaluationCriteriaRepository evaluationCriteriaRepository;
-    private final RoundCriteriaRepository roundCriteriaRepository;
+
 
     @Override
     public List<AssessmentRoundResponseDTO> getAR() {
@@ -45,11 +42,9 @@ public class AssessmentRoundsServiceImpl implements AssessmentRoundsService {
 
     @Override
     public AssessmentRoundResponseDTO getARById(Long id) {
-        AssessmentRounds assessmentRounds = assessmentRoundsRepository.findById(id).orElseThrow(() -> {
-            String errorMessage = messageSourceConfig.messageSource()
-                    .getMessage("error.resource.not_found", new Object[]{"AssessmentRounds", id}, LocaleContextHolder.getLocale());
-            return new ResourceNotFoundException(errorMessage);
-        });
+        AssessmentRounds assessmentRounds = assessmentRoundsRepository.findById(id).orElseThrow(() ->
+            new ResourceNotFoundException(ResponseWrapper.getMessage("error.assessment_round.not_found"))
+        );
         return assessmentRoundMapper.roundToResponseDTO(assessmentRounds);
     }
 
@@ -58,15 +53,6 @@ public class AssessmentRoundsServiceImpl implements AssessmentRoundsService {
     public AssessmentRoundResponseDTO createAR(
             AssessmentRoundRequestDTO assessmentRoundRequestDTO
     ) {
-
-        if (assessmentRoundRequestDTO.getStartDate()
-                .isAfter(assessmentRoundRequestDTO.getEndDate())) {
-
-            throw new IllegalArgumentException(
-                    "Ngày bắt đầu không được lớn hơn ngày kết thúc"
-            );
-        }
-
 
         InternshipPhases phase =
                 internshipPhasesRepository
@@ -174,26 +160,13 @@ public class AssessmentRoundsServiceImpl implements AssessmentRoundsService {
             Long id
     ) {
 
+
         AssessmentRounds assessmentRound =
                 assessmentRoundsRepository.findById(id)
-                        .orElseThrow(() -> {
-                            String errorMessage = messageSourceConfig
-                                    .messageSource()
-                                    .getMessage(
-                                            "error.resource.not_found",
-                                            new Object[]{"Assessment Round", id},
-                                            LocaleContextHolder.getLocale()
-                                    );
-
-                            return new ResourceNotFoundException(errorMessage);
-                        });
-
-
-        if (request.getStartDate().isAfter(request.getEndDate())) {
-            throw new IllegalArgumentException(
-                    "Ngày bắt đầu không được lớn hơn ngày kết thúc"
-            );
-        }
+                        .orElseThrow(() ->
+                            new ResourceNotFoundException(ResponseWrapper.getMessage(
+                                    "error.assessment_round.not_found"))
+                        );
 
 
         InternshipPhases phase =
@@ -204,25 +177,10 @@ public class AssessmentRoundsServiceImpl implements AssessmentRoundsService {
                                                 + request.getPhaseId()
                                 )
                         );
-
-
-
         Set<Long> criterionIds = new HashSet<>();
 
         for (RoundCriterionRequestDTO criterionRequest
                 : request.getCriteria()) {
-
-            if (criterionRequest.getCriterionId() == null) {
-                throw new IllegalArgumentException(
-                        "criterionId không được để trống"
-                );
-            }
-
-            if (criterionRequest.getWeight() == null) {
-                throw new IllegalArgumentException(
-                        "Trọng số của tiêu chí không được để trống"
-                );
-            }
 
             if (!criterionIds.add(criterionRequest.getCriterionId())) {
 
@@ -233,7 +191,6 @@ public class AssessmentRoundsServiceImpl implements AssessmentRoundsService {
                 );
             }
         }
-
 
         BigDecimal totalWeight =
                 request.getCriteria()
@@ -251,7 +208,6 @@ public class AssessmentRoundsServiceImpl implements AssessmentRoundsService {
             );
         }
 
-
         assessmentRound.setPhases(phase);
         assessmentRound.setRoundName(request.getRoundName());
         assessmentRound.setStartDate(request.getStartDate());
@@ -259,14 +215,7 @@ public class AssessmentRoundsServiceImpl implements AssessmentRoundsService {
         assessmentRound.setDescription(request.getDescription());
         assessmentRound.setActive(request.isActive());
 
-
-        AssessmentRounds savedRound =
-                assessmentRoundsRepository.save(assessmentRound);
-
-
-
-        roundCriteriaRepository.deleteById(savedRound.getId());
-
+        assessmentRound.getRoundCriteria().clear();
 
         for (RoundCriterionRequestDTO criterionRequest
                 : request.getCriteria()) {
@@ -281,20 +230,16 @@ public class AssessmentRoundsServiceImpl implements AssessmentRoundsService {
                                     )
                             );
 
+            RoundCriteria roundCriteria = new RoundCriteria();
 
-            RoundCriteria roundCriteria =
-                    new RoundCriteria();
-
-            roundCriteria.setRound(savedRound);
+            roundCriteria.setRound(assessmentRound);
             roundCriteria.setCriterion(criterion);
             roundCriteria.setWeight(criterionRequest.getWeight());
 
-            roundCriteriaRepository.save(roundCriteria);
+            assessmentRound.getRoundCriteria().add(roundCriteria);
         }
 
-
-
-        return assessmentRoundMapper.roundToResponseDTO(savedRound);
+        return assessmentRoundMapper.roundToResponseDTO(assessmentRound);
     }
 
     @Override
@@ -303,18 +248,9 @@ public class AssessmentRoundsServiceImpl implements AssessmentRoundsService {
 
         AssessmentRounds assessmentRound =
                 assessmentRoundsRepository.findById(id)
-                        .orElseThrow(() -> {
-
-                            String errorMessage = messageSourceConfig
-                                    .messageSource()
-                                    .getMessage(
-                                            "error.resource.not_found",
-                                            new Object[]{"Assessment Round", id},
-                                            LocaleContextHolder.getLocale()
-                                    );
-
-                            return new ResourceNotFoundException(errorMessage);
-                        });
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(ResponseWrapper.getMessage("error.assessment_round.not_found"))
+                        );
 
         assessmentRoundsRepository.delete(assessmentRound);
     }

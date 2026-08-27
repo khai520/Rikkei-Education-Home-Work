@@ -30,6 +30,10 @@ public interface AssessmentRoundMapper {
     );
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "phases" , ignore = true)
+    @Mapping(target = "assessmentResults" , ignore = true)
+    @Mapping(target = "roundCriteria", ignore = true)
+    @Mapping(source = "active" , target = "isActive")
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     AssessmentRounds requestToRound(
@@ -37,6 +41,9 @@ public interface AssessmentRoundMapper {
     );
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "phases" , ignore = true)
+    @Mapping(target = "assessmentResults" , ignore = true)
+    @Mapping(target = "roundCriteria", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     void updateRound(

@@ -7,5 +7,4 @@ import org.ra.qltt.model.entity.Users;
 
 public interface AuthService {
     UserLoginResponseDTO login(UserLoginDTO userLoginDTO);
-    Users authenticationGetUser();
 }

@@ -1,8 +1,9 @@
 package org.ra.qltt.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.ra.qltt.config.MessageSourceConfig;
 import org.ra.qltt.exception.ResourceNotFoundException;
+import org.ra.qltt.exception.ResponseWrapper;
+import org.ra.qltt.model.dto.enums.UserRole;
 import org.ra.qltt.model.dto.request.MentorRequestDTO;
 import org.ra.qltt.model.dto.response.MentorResponseDTO;
 import org.ra.qltt.model.entity.Mentors;
@@ -10,10 +11,11 @@ import org.ra.qltt.model.entity.Users;
 import org.ra.qltt.model.mapper.MentorMapper;
 import org.ra.qltt.repository.MentorRepository;
 import org.ra.qltt.repository.UserRepository;
-import org.ra.qltt.service.AuthService;
+import org.ra.qltt.security.UserPrinciple;
 import org.ra.qltt.service.MentorService;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,8 +26,6 @@ public class MentorServiceImpl implements MentorService {
 
     private final MentorRepository mentorRepository;
     private final MentorMapper mentorMapper;
-    private final AuthService authService;
-    private final MessageSourceConfig messageSourceConfig;
     private final UserRepository  userRepository;
 
     @Override
@@ -36,36 +36,36 @@ public class MentorServiceImpl implements MentorService {
 
     @Override
     public MentorResponseDTO findMentorByID(Long id) {
-        Users users = authService.authenticationGetUser();
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        assert authentication != null;
+        UserPrinciple principal =
+                (UserPrinciple) authentication.getPrincipal();
+
+        assert principal != null;
+        Users users = principal.getUser();
+
         assert users != null;
-        Mentors mentor = mentorRepository.findById(id).orElseThrow(() ->{
-            String errorMessage = messageSourceConfig.messageSource()
-                    .getMessage("error.resource.not_found", new Object[]{"Mentors", id}, LocaleContextHolder.getLocale());
-            return new ResourceNotFoundException(errorMessage);
-        });
+        Mentors mentor = mentorRepository.findById(id).orElseThrow(() ->
+                new ResourceNotFoundException(ResponseWrapper.getMessage("error.mentor.not_found"))
+        );
         if ("MENTOR".equals(users.getRole()) && users.getId() != id) {
             throw new AccessDeniedException(
                     "Chỉ xem được thông tin bản thân"
             );
         }
-        return mentorMapper.mentorToMentorResponseDTO(mentor);
+        return mentorMapper.mentorToMentorResponseDTO(  mentor);
     }
 
     @Override
     public MentorResponseDTO createMentor(MentorRequestDTO mentorRequestDTO) {
         Users user = userRepository.findById(mentorRequestDTO.getUserId())
-                .orElseThrow(() -> {
-                    String errorMessage = messageSourceConfig.messageSource()
-                            .getMessage(
-                                    "error.resource.not_found",
-                                    new Object[]{"Mentors", mentorRequestDTO.getUserId()},
-                                    LocaleContextHolder.getLocale()
-                            );
+                .orElseThrow(() ->
+                    new ResourceNotFoundException(ResponseWrapper.getMessage("error.mentor.not_found"))
+                );
 
-                    return new ResourceNotFoundException(errorMessage);
-                });
-
-        if (!user.getRole().equals(Users.UserRole.MENTOR.name())) {
+        if (!user.getRole().equals(UserRole.MENTOR.name())) {
             throw new IllegalArgumentException(
                     "User phải có role MENTOR"
             );
@@ -90,7 +90,15 @@ public class MentorServiceImpl implements MentorService {
 
     @Override
     public MentorResponseDTO updateMentor(MentorRequestDTO mentorRequestDTO , Long id) {
-        String username = authService.authenticationGetUser().getUsername();
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        assert authentication != null;
+        UserPrinciple principal =
+                (UserPrinciple) authentication.getPrincipal();
+
+        assert principal != null;
+        String username = principal.getUser().getUsername();
 
         Mentors mentors = mentorRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -103,7 +111,7 @@ public class MentorServiceImpl implements MentorService {
                 ));
 
 
-        if (currentUser.getRole().equals(Users.UserRole.MENTOR.name())
+        if (currentUser.getRole().equals(UserRole.MENTOR.name())
                 && !mentors.getId().equals(currentUser.getId())) {
 
             throw new AccessDeniedException(

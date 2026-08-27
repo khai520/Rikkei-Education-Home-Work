@@ -1,8 +1,9 @@
 package org.ra.qltt.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.ra.qltt.config.MessageSourceConfig;
 import org.ra.qltt.exception.ResourceNotFoundException;
+import org.ra.qltt.exception.ResponseWrapper;
+import org.ra.qltt.model.dto.enums.UserRole;
 import org.ra.qltt.model.dto.request.StudentRequestDTO;
 import org.ra.qltt.model.dto.response.StudentResponseDTO;
 import org.ra.qltt.model.entity.Students;
@@ -10,12 +11,12 @@ import org.ra.qltt.model.entity.Users;
 import org.ra.qltt.model.mapper.StudentMapper;
 import org.ra.qltt.repository.StudentRepository;
 import org.ra.qltt.repository.UserRepository;
-import org.ra.qltt.service.AuthService;
+import org.ra.qltt.security.UserPrinciple;
 import org.ra.qltt.service.StudentService;
 
-import org.springframework.context.i18n.LocaleContextHolder;
-
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,14 +28,20 @@ import java.util.List;
 public class StudentServiceImpl implements StudentService {
     private final StudentRepository studentRepository;
     private final StudentMapper studentMapper;
-    private final MessageSourceConfig messageSourceConfig;
-    private final AuthService authService;
     private final UserRepository userRepository;
 
     @Override
     public List<StudentResponseDTO> getStudents() {
 
-        Users user = authService.authenticationGetUser();
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        assert authentication != null;
+        UserPrinciple principal =
+                (UserPrinciple) authentication.getPrincipal();
+
+        assert principal != null;
+        Users user = principal.getUser();
 
         List<Students> students;
 
@@ -54,15 +61,21 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public StudentResponseDTO getStudentByID(Long id) {
-        Users user = authService.authenticationGetUser();
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        assert authentication != null;
+        UserPrinciple principal =
+                (UserPrinciple) authentication.getPrincipal();
+
+        assert principal != null;
+        Users user = principal.getUser();
         Students students;
 
         assert user != null;
-        students = studentRepository.findById(id).orElseThrow(() ->{
-            String errorMessage = messageSourceConfig.messageSource()
-                    .getMessage("error.resource.not_found", new Object[]{"Student", id}, LocaleContextHolder.getLocale());
-            return new ResourceNotFoundException(errorMessage);
-        });
+        students = studentRepository.findById(id).orElseThrow(() ->
+            new ResourceNotFoundException(ResponseWrapper.getMessage("error.student.not_found"))
+        );
         if ("STUDENT".equals(user.getRole()) && user.getId() != id ) {
             throw new AccessDeniedException(
                     "Chỉ có thể xem thông tin bản thân"
@@ -75,18 +88,11 @@ public class StudentServiceImpl implements StudentService {
     @Transactional
     public StudentResponseDTO createStudent(StudentRequestDTO studentRequestDTO) {
         Users user = userRepository.findById(studentRequestDTO.getUserId())
-                .orElseThrow(() -> {
-                    String errorMessage = messageSourceConfig.messageSource()
-                            .getMessage(
-                                    "error.resource.not_found",
-                                    new Object[]{"Student", studentRequestDTO.getUserId()},
-                                    LocaleContextHolder.getLocale()
-                            );
+                .orElseThrow(() ->
+                    new ResourceNotFoundException(ResponseWrapper.getMessage("error.student.not_found"))
+                );
 
-                    return new ResourceNotFoundException(errorMessage);
-                });
-
-        if (!user.getRole().equals(Users.UserRole.STUDENT.name())) {
+        if (!user.getRole().equals(UserRole.STUDENT.name())) {
             throw new IllegalArgumentException(
                     "User phải có role STUDENT"
             );
@@ -115,8 +121,15 @@ public class StudentServiceImpl implements StudentService {
             Long studentId,
             StudentRequestDTO request
     ) {
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
 
-        String username = authService.authenticationGetUser().getUsername();
+        assert authentication != null;
+        UserPrinciple principal =
+                (UserPrinciple) authentication.getPrincipal();
+
+        assert principal != null;
+        String username = principal.getUser().getUsername();
 
         Students student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -129,7 +142,7 @@ public class StudentServiceImpl implements StudentService {
                 ));
 
 
-        if (currentUser.getRole().equals(Users.UserRole.STUDENT.name())
+        if (currentUser.getRole().equals(UserRole.STUDENT.name())
                 && !student.getId().equals(currentUser.getId())) {
 
             throw new AccessDeniedException(

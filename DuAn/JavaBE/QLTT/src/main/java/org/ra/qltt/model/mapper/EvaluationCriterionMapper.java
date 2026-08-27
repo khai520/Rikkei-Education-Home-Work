@@ -12,6 +12,7 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface EvaluationCriterionMapper {
 
+    @Mapping(source = "id" , target = "criterionId")
     EvaluationCriterionResponseDTO criterionToResponseDTO(
             EvaluationCriteria criterion
     );
@@ -21,6 +22,8 @@ public interface EvaluationCriterionMapper {
     );
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "roundCriteria", ignore = true)
+    @Mapping(target = "assessmentResults", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     EvaluationCriteria requestToCriterion(
@@ -28,6 +31,8 @@ public interface EvaluationCriterionMapper {
     );
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "roundCriteria", ignore = true)
+    @Mapping(target = "assessmentResults", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     void updateCriterion(

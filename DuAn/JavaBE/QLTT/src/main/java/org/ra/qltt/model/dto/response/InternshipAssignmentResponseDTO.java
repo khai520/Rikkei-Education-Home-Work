@@ -1,7 +1,7 @@
 package org.ra.qltt.model.dto.response;
 
 import lombok.Data;
-import org.ra.qltt.model.entity.InternshipAssignments;
+import org.ra.qltt.model.dto.enums.AssignmentStatus;
 
 import java.time.LocalDateTime;
 
@@ -22,7 +22,7 @@ public class InternshipAssignmentResponseDTO {
 
     private LocalDateTime assignedDate;
 
-    private InternshipAssignments.AssignmentStatus status;
+    private AssignmentStatus status;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

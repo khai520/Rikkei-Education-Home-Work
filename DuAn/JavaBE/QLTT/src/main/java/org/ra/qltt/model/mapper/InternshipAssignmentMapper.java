@@ -36,6 +36,10 @@ public interface InternshipAssignmentMapper {
     );
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "phase", ignore = true)
+    @Mapping(target = "student", ignore = true)
+    @Mapping(target = "mentor", ignore = true)
+    @Mapping(target = "assessmentResults", ignore = true)
     @Mapping(target = "assignedDate", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
@@ -44,6 +48,10 @@ public interface InternshipAssignmentMapper {
     );
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "phase", ignore = true)
+    @Mapping(target = "student", ignore = true)
+    @Mapping(target = "mentor", ignore = true)
+    @Mapping(target = "assessmentResults", ignore = true)
     @Mapping(target = "assignedDate", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)

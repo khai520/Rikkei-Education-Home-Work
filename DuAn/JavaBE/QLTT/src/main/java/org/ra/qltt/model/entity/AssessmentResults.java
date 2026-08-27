@@ -54,6 +54,7 @@ public class AssessmentResults {
     @PrePersist
     protected void onCreate() {
         LocalDateTime now = LocalDateTime.now();
+        evaluationDate = now;
         createdAt = now;
         updatedAt = now;
     }

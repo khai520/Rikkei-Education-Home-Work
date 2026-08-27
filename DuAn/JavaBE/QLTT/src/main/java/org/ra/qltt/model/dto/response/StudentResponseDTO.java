@@ -1,7 +1,7 @@
 package org.ra.qltt.model.dto.response;
 
 import lombok.Data;
-import org.ra.qltt.model.entity.Users;
+import org.ra.qltt.model.dto.enums.UserRole;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -15,7 +15,7 @@ public class StudentResponseDTO {
     private String fullName;
     private String email;
     private String phoneNumber;
-    private Users.UserRole role;
+    private UserRole role;
     private boolean active;
 
     private String studentCode;

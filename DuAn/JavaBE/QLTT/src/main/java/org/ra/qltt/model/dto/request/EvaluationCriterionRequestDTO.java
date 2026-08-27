@@ -13,7 +13,7 @@ public class EvaluationCriterionRequestDTO {
 
     @NotBlank(message = "Tên tiêu chí không được để trống")
     @Size(max = 200)
-    private String criterionName;
+    private String criteriaName;
 
     private String description;
 

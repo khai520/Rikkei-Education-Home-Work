@@ -59,10 +59,4 @@ public class InternshipAssignments {
         updatedAt = LocalDateTime.now();
     }
 
-    public enum AssignmentStatus {
-        PENDING,
-        IN_PROGRESS,
-        COMPLETED,
-        CANCELLED
-    }
 }

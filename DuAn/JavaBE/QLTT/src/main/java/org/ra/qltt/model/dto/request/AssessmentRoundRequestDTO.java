@@ -22,6 +22,7 @@ public class AssessmentRoundRequestDTO {
     @Size(max = 100, message = "Tên đợt đánh giá không được vượt quá 100 ký tự")
     private String roundName;
 
+
     @NotNull(message = "Ngày bắt đầu không được để trống")
     private LocalDate startDate;
 

@@ -1,10 +1,12 @@
 package org.ra.qltt.model.dto.request;
 
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Data
 public class AssessmentResultRequestDTO {
@@ -22,5 +24,8 @@ public class AssessmentResultRequestDTO {
     @DecimalMin(value = "0.00", message = "Điểm không được nhỏ hơn 0")
     private BigDecimal score;
 
-    private String comments;
+    @FutureOrPresent(message = "Thời gian đánh giá không được ở quá khứ")
+    private LocalDateTime evaluationDate;
+
+    private String comment;
 }
