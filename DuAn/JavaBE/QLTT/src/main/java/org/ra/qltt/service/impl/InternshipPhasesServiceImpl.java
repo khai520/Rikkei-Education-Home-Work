@@ -2,6 +2,7 @@ package org.ra.qltt.service.impl;
 
 import lombok.RequiredArgsConstructor;
 
+import org.ra.qltt.exception.ResourceAlreadyExistsException;
 import org.ra.qltt.exception.ResourceNotFoundException;
 import org.ra.qltt.exception.ResponseWrapper;
 import org.ra.qltt.model.dto.request.InternshipPhaseRequestDTO;
@@ -39,6 +40,9 @@ public class InternshipPhasesServiceImpl implements InternshipPhasesService {
     @Override
     public InternshipPhaseResponseDTO createIP(InternshipPhaseRequestDTO internshipPhaseRequestDTO) {
         InternshipPhases internshipPhases = internshipPhaseMapper.requestToInternshipPhase(internshipPhaseRequestDTO);
+        if(IPR.existsByPhaseName(internshipPhaseRequestDTO.getPhaseName())){
+            throw  new ResourceAlreadyExistsException(ResponseWrapper.getMessage("error.internship_phase.already_exists"));
+        }
         InternshipPhases newInternshipPhase = IPR.save(internshipPhases);
         return internshipPhaseMapper.internshipPhaseToResponseDTO(newInternshipPhase);
     }
@@ -48,6 +52,9 @@ public class InternshipPhasesServiceImpl implements InternshipPhasesService {
         InternshipPhases internshipPhases = IPR.findById(id).orElseThrow(() ->
             new ResourceNotFoundException(ResponseWrapper.getMessage("error.internship_phase.not_found"))
         );
+        if(IPR.existsByPhaseNameAndIdNot(internshipPhaseRequestDTO.getPhaseName() , id)){
+            throw  new ResourceAlreadyExistsException(ResponseWrapper.getMessage("error.internship_phase.already_exists"));
+        }
         internshipPhaseMapper.updateInternshipPhase(internshipPhaseRequestDTO , internshipPhases);
         InternshipPhases updateIP = IPR.save(internshipPhases);
         return internshipPhaseMapper.internshipPhaseToResponseDTO(updateIP);

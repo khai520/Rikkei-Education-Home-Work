@@ -4,6 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.ra.qltt.model.dto.request.StudentRequestDTO;
+import org.ra.qltt.model.dto.request.StudentUpdateRequestDTO;
 import org.ra.qltt.model.dto.response.StudentResponseDTO;
 import org.ra.qltt.model.entity.Students;
 
@@ -46,11 +47,12 @@ public interface StudentMapper {
 
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "studentCode" , ignore = true)
     @Mapping(target = "user", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     void updateStudentFromDTO(
-            StudentRequestDTO request,
+            StudentUpdateRequestDTO request,
             @MappingTarget Students student
     );
 }

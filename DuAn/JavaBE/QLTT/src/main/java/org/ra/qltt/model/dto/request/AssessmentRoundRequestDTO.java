@@ -11,7 +11,7 @@ import org.ra.qltt.validation.ValidDateRange;
 import java.time.LocalDate;
 import java.util.List;
 
-@ValidDateRange
+@ValidDateRange(startDate = "startDate" , endDate = "endDate")
 @Data
 public class AssessmentRoundRequestDTO {
 

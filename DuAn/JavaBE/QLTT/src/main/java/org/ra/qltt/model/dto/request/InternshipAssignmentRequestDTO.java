@@ -4,6 +4,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import org.ra.qltt.model.dto.enums.AssignmentStatus;
 
+import java.time.LocalDateTime;
+
 @Data
 public class InternshipAssignmentRequestDTO {
 
@@ -15,6 +17,8 @@ public class InternshipAssignmentRequestDTO {
 
     @NotNull(message = "Phase ID không được để trống")
     private Long phaseId;
+
+    private LocalDateTime assignedDate;
 
     private AssignmentStatus status;
 }

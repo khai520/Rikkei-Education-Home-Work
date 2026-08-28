@@ -1,6 +1,7 @@
 package org.ra.qltt.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.ra.qltt.exception.ResourceAlreadyExistsException;
 import org.ra.qltt.exception.ResourceNotFoundException;
 import org.ra.qltt.exception.ResponseWrapper;
 import org.ra.qltt.model.dto.request.EvaluationCriterionRequestDTO;
@@ -36,6 +37,9 @@ public class EvaluationCriteriaServiceImpl implements EvaluationCriteriaService 
 
     @Override
     public EvaluationCriterionResponseDTO createEC(EvaluationCriterionRequestDTO evaluationCriterionRequestDTO) {
+        if(evaluationCriteriaRepository.existsByCriteriaName(evaluationCriterionRequestDTO.getCriteriaName())){
+            throw new ResourceAlreadyExistsException(ResponseWrapper.getMessage("error.evaluation_criteria.already_exists"));
+        }
         EvaluationCriteria evaluationCriteria = evaluationCriterionMapper.requestToCriterion(evaluationCriterionRequestDTO);
         EvaluationCriteria newEvaluationCriteria = evaluationCriteriaRepository.save(evaluationCriteria);
         return evaluationCriterionMapper.criterionToResponseDTO(newEvaluationCriteria);
@@ -46,6 +50,9 @@ public class EvaluationCriteriaServiceImpl implements EvaluationCriteriaService 
         EvaluationCriteria evaluationCriteria = evaluationCriteriaRepository.findById(id).orElseThrow(() ->
                 new ResourceNotFoundException(ResponseWrapper.getMessage("error.evaluation_criteria.not_found"))
         );
+        if(evaluationCriteriaRepository.existsByCriteriaNameAndIdNot(evaluationCriterionRequestDTO.getCriteriaName() , id)){
+            throw new ResourceAlreadyExistsException(ResponseWrapper.getMessage("error.evaluation_criteria.already_exists"));
+        }
         evaluationCriterionMapper.updateCriterion(evaluationCriterionRequestDTO, evaluationCriteria);
         EvaluationCriteria updateEC = evaluationCriteriaRepository.save(evaluationCriteria);
         return evaluationCriterionMapper.criterionToResponseDTO(updateEC);

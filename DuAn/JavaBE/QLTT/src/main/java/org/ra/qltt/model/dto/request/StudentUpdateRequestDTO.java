@@ -7,13 +7,7 @@ import lombok.Data;
 import java.time.LocalDate;
 
 @Data
-public class StudentRequestDTO {
-    @NotNull(message = "User ID không được để trống")
-    private Long userId;
-
-    @Size(max = 20)
-    @NotNull(message = "Student code không được để trống")
-    private String studentCode;
+public class StudentUpdateRequestDTO {
 
     @Size(max = 100)
     private String major;

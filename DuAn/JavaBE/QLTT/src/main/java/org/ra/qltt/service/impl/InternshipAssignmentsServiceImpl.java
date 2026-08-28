@@ -133,7 +133,7 @@ public class InternshipAssignmentsServiceImpl implements InternshipAssignmentsSe
                                 )
                         );
         if (internshipAssignmentsRepository
-                .existsByStudentIdAndPhase_Id(
+                .existsByStudentIdAndPhaseId(
                         request.getStudentId(),
                         request.getPhaseId()
                 )) {

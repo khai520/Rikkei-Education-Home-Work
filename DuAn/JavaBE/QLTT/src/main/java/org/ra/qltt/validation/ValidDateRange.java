@@ -11,9 +11,13 @@ import java.lang.annotation.*;
 @Documented
 public @interface ValidDateRange {
 
-    String message() default "Ngày bắt đầu không được lớn hơn ngày kết thúc";
+    String message() default "Ngày bắt đầu phải trước ngày kết thúc";
 
     Class<?>[] groups() default {};
 
     Class<? extends Payload>[] payload() default {};
+
+    String startDate();
+
+    String endDate();
 }

@@ -4,9 +4,11 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import org.ra.qltt.validation.ValidDateRange;
 
 import java.time.LocalDate;
 
+@ValidDateRange(startDate = "startDate" , endDate = "endDate")
 @Data
 public class InternshipPhaseRequestDTO {
 

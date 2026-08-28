@@ -14,5 +14,6 @@ public interface InternshipAssignmentsRepository extends JpaRepository<Internshi
 
     InternshipAssignments findByIdAndStudent_Id(Long id, Long studentId);
 
-    boolean existsByStudentIdAndPhase_Id(Long studentId, Long phaseId);
+
+    boolean existsByStudentIdAndPhaseId(Long studentId, Long phaseId);
 }

@@ -116,7 +116,6 @@ public class GlobalHandleException {
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ResponseWrapper<Void>>
     handleAccessDeniedException(
-            AccessDeniedException e
     ) {
 
         return ResponseEntity

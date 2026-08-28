@@ -16,4 +16,6 @@ public interface StudentRepository extends JpaRepository<Students, Long> {
     List<Students> findStudentsByMentorId(
             @Param("mentorId") Long mentorId
     );
+
+    boolean findByStudentCode(String studentCode);
 }

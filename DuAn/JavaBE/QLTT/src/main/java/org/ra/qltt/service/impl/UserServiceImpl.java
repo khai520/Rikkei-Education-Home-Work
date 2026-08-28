@@ -11,6 +11,8 @@ import org.ra.qltt.model.dto.request.UserUpdateRequestDTO;
 import org.ra.qltt.model.dto.response.UserResponseDTO;
 import org.ra.qltt.model.entity.Users;
 import org.ra.qltt.model.mapper.UserMapper;
+import org.ra.qltt.repository.MentorRepository;
+import org.ra.qltt.repository.StudentRepository;
 import org.ra.qltt.repository.UserRepository;
 import org.ra.qltt.service.UserService;
 import org.springframework.security.access.AccessDeniedException;
@@ -26,6 +28,8 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final MentorRepository mentorRepository;
+    private final StudentRepository studentRepository;
 
     @Override
     public List<UserResponseDTO> getUsers(){
@@ -117,6 +121,16 @@ public class UserServiceImpl implements UserService {
                     "Không được tự thay đổi vai trò của chính mình"
             );
         }
+
+        if(mentorRepository.existsById(user.getId()))
+        {
+            mentorRepository.deleteById(user.getId());
+        }
+        else if (studentRepository.existsById(user.getId())) 
+        {
+            studentRepository.deleteById(user.getId());
+        }
+
         user.setRole(user.getRole().contains(UserRole.STUDENT.name()) ? UserRole.MENTOR.name() : UserRole.STUDENT.name());
 
         Users updatedUser = userRepository.save(user);

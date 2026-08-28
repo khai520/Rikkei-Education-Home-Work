@@ -52,6 +52,7 @@ public class InternshipAssignments {
         LocalDateTime now = LocalDateTime.now();
         createdAt = now;
         updatedAt = now;
+        assignedDate = now;
     }
 
     @PreUpdate

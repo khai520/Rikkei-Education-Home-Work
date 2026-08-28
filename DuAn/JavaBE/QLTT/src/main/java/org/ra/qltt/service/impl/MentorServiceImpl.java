@@ -71,7 +71,7 @@ public class MentorServiceImpl implements MentorService {
             );
         }
 
-        if (userRepository.existsById(user.getId())) {
+        if (mentorRepository.existsById(user.getId())) {
             throw new IllegalArgumentException(
                     "User này đã có thông tin "
             );

@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.ra.qltt.model.dto.request.StudentRequestDTO;
 import org.ra.qltt.exception.ResponseWrapper;
+import org.ra.qltt.model.dto.request.StudentUpdateRequestDTO;
 import org.ra.qltt.model.dto.response.StudentResponseDTO;
 import org.ra.qltt.service.StudentService;
 import org.springframework.http.HttpStatus;
@@ -39,7 +40,7 @@ public class StudentController {
     @PutMapping("/{studentId}")
     public ResponseEntity<?> updateStudent(
             @PathVariable Long studentId,
-            @Valid @RequestBody StudentRequestDTO request
+            @Valid @RequestBody StudentUpdateRequestDTO request
     ) {
 
         StudentResponseDTO student =

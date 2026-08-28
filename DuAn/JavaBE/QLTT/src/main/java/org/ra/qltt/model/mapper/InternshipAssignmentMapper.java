@@ -2,7 +2,6 @@ package org.ra.qltt.model.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
 import org.ra.qltt.model.dto.request.InternshipAssignmentRequestDTO;
 import org.ra.qltt.model.dto.response.InternshipAssignmentResponseDTO;
 import org.ra.qltt.model.entity.InternshipAssignments;
@@ -40,23 +39,10 @@ public interface InternshipAssignmentMapper {
     @Mapping(target = "student", ignore = true)
     @Mapping(target = "mentor", ignore = true)
     @Mapping(target = "assessmentResults", ignore = true)
-    @Mapping(target = "assignedDate", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     InternshipAssignments requestToAssignment(
             InternshipAssignmentRequestDTO request
     );
 
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "phase", ignore = true)
-    @Mapping(target = "student", ignore = true)
-    @Mapping(target = "mentor", ignore = true)
-    @Mapping(target = "assessmentResults", ignore = true)
-    @Mapping(target = "assignedDate", ignore = true)
-    @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "updatedAt", ignore = true)
-    void updateAssignment(
-            InternshipAssignmentRequestDTO request,
-            @MappingTarget InternshipAssignments assignment
-    );
 }

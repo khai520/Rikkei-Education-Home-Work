@@ -1,10 +1,12 @@
 package org.ra.qltt.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.ra.qltt.exception.ResourceAlreadyExistsException;
 import org.ra.qltt.exception.ResourceNotFoundException;
 import org.ra.qltt.exception.ResponseWrapper;
 import org.ra.qltt.model.dto.enums.UserRole;
 import org.ra.qltt.model.dto.request.StudentRequestDTO;
+import org.ra.qltt.model.dto.request.StudentUpdateRequestDTO;
 import org.ra.qltt.model.dto.response.StudentResponseDTO;
 import org.ra.qltt.model.entity.Students;
 import org.ra.qltt.model.entity.Users;
@@ -104,6 +106,14 @@ public class StudentServiceImpl implements StudentService {
             );
         }
 
+        studentRequestDTO.setStudentCode(studentRequestDTO.getStudentCode().toUpperCase());
+
+        if(studentRepository.findByStudentCode(studentRequestDTO.getStudentCode())){
+            throw new ResourceAlreadyExistsException(
+                    "Student Code này đã tồn tại"
+            );
+        }
+
         Students student =
                 studentMapper.studentRequestToStudents(studentRequestDTO);
 
@@ -119,7 +129,7 @@ public class StudentServiceImpl implements StudentService {
     @Transactional
     public StudentResponseDTO updateStudent(
             Long studentId,
-            StudentRequestDTO request
+            StudentUpdateRequestDTO request
     ) {
         Authentication authentication =
                 SecurityContextHolder.getContext().getAuthentication();
@@ -147,14 +157,6 @@ public class StudentServiceImpl implements StudentService {
 
             throw new AccessDeniedException(
                     "Sinh viên chỉ được cập nhật thông tin của chính mình"
-            );
-        }
-
-        if (request.getUserId() != null
-                && !request.getUserId().equals(student.getId())) {
-
-            throw new IllegalArgumentException(
-                    "Không được thay đổi người dùng liên kết với sinh viên"
             );
         }
 
