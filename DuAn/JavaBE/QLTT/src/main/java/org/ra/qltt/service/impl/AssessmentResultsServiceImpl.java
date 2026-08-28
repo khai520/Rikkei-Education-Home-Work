@@ -83,8 +83,8 @@ public class AssessmentResultsServiceImpl implements AssessmentResultsService {
                     new NoResultException(ResponseWrapper.getMessage("error.assessment_result.round_not_found"))
                 );
 
-        if (assessmentResultsRepository.findByAssignmentIdAndCriterionIdAndRoundId(assessmentResultRequestDTO.getAssignmentId(), assessmentResultRequestDTO.getCriterionId(), assessmentResultRequestDTO.getRoundId()) != null) {
-            throw new ResourceAlreadyExistsException(ResponseWrapper.getMessage("error.assessment_result.duplicate"));
+        if (assessmentResultsRepository.existsByAssignmentIdAndCriterionIdAndRoundId(assessmentResultRequestDTO.getAssignmentId(), assessmentResultRequestDTO.getCriterionId(), assessmentResultRequestDTO.getRoundId())) {
+            throw new ResourceAlreadyExistsException(ResponseWrapper.getMessage("error.assessment_result.already_exists"));
         }
 
         AssessmentResults assessmentResults = assessmentResultMapper.requestToResult(assessmentResultRequestDTO);
