@@ -4,6 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.ra.qltt.model.dto.request.UserRequestDTO;
+import org.ra.qltt.model.dto.request.UserUpdateRequestDTO;
 import org.ra.qltt.model.dto.response.UserResponseDTO;
 import org.ra.qltt.model.entity.Users;
 
@@ -26,11 +27,14 @@ public interface UserMapper {
 
     // Update Entity
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "username", ignore = true)
+    @Mapping(target = "role", ignore = true)
+    @Mapping(target = "active", ignore = true)
     @Mapping(target = "passwordHash", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     void updateUserFromDTO(
-            UserRequestDTO request,
+            UserUpdateRequestDTO request,
             @MappingTarget Users user
     );
 }

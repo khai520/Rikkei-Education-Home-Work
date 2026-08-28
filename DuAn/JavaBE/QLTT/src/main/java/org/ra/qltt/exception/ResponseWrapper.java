@@ -6,7 +6,9 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Component;
 
+import java.text.MessageFormat;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -38,12 +40,13 @@ public class ResponseWrapper<T> {
     public static <T> ResponseWrapper<T> success(
             T data,
             String messageKey,
-            int httpCode
+            int httpCode,
+            Object... args
     ) {
         return ResponseWrapper.<T>builder()
                 .httpCode(httpCode)
                 .success(true)
-                .message(getMessage(messageKey))
+                .message(getMessage(messageKey, args))
                 .data(data)
                 .errors(null)
                 .time(LocalDateTime.now())
@@ -53,23 +56,33 @@ public class ResponseWrapper<T> {
     public static <T> ResponseWrapper<T> error(
             T errors,
             String messageKey,
-            int httpCode
+            int httpCode,
+            Object... args
     ) {
         return ResponseWrapper.<T>builder()
                 .httpCode(httpCode)
                 .success(false)
-                .message(getMessage(messageKey))
+                .message(getMessage(messageKey, args))
                 .data(null)
                 .errors(errors)
                 .time(LocalDateTime.now())
                 .build();
     }
 
-    public static String getMessage(String messageKey) {
-        return messageSource.getMessage(
+    public static String getMessage(
+            String messageKey,
+            Object... args
+    ) {
+        String message = messageSource.getMessage(
                 messageKey,
                 null,
+                messageKey,
                 LocaleContextHolder.getLocale()
+        );
+
+        return MessageFormat.format(
+                Objects.requireNonNull(message),
+                args
         );
     }
 }

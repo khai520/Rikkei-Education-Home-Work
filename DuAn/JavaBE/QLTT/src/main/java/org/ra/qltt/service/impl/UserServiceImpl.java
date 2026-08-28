@@ -2,16 +2,19 @@ package org.ra.qltt.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.ra.qltt.exception.ResourceAlreadyExistsException;
 import org.ra.qltt.exception.ResourceNotFoundException;
 import org.ra.qltt.exception.ResponseWrapper;
 import org.ra.qltt.model.dto.enums.UserRole;
 import org.ra.qltt.model.dto.request.UserRequestDTO;
+import org.ra.qltt.model.dto.request.UserUpdateRequestDTO;
 import org.ra.qltt.model.dto.response.UserResponseDTO;
 import org.ra.qltt.model.entity.Users;
 import org.ra.qltt.model.mapper.UserMapper;
 import org.ra.qltt.repository.UserRepository;
 import org.ra.qltt.service.UserService;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,16 +54,35 @@ public class UserServiceImpl implements UserService {
     public UserResponseDTO createUser(UserRequestDTO userRequestDTO) {
 
         Users user = userMapper.userRequestToUsers(userRequestDTO);
+
+        if (userRepository.existsByUsername(userRequestDTO.getUsername())) {
+            throw new ResourceAlreadyExistsException(
+                    ResponseWrapper.getMessage("error.user.username_exists")
+            );
+        }
+
+        if (userRepository.existsByEmail(userRequestDTO.getEmail())) {
+            throw new ResourceAlreadyExistsException(
+                    ResponseWrapper.getMessage("error.user.email_exists")
+            );
+        }
+        user.setPasswordHash(new BCryptPasswordEncoder().encode(userRequestDTO.getPassword()));
         Users createdUser = userRepository.save(user);
         return userMapper.userToUserResponseDTO(createdUser);
     }
 
     @Override
     @Transactional
-    public UserResponseDTO updateUser(UserRequestDTO userRequestDTO , Long id) {
+    public UserResponseDTO updateUser(UserUpdateRequestDTO userRequestDTO , Long id) {
         Users user = userRepository.findById(id).orElseThrow(() ->
                 new ResourceNotFoundException(ResponseWrapper.getMessage("error.user.not_found"))
         );
+
+        if (userRepository.existsByEmailAndIdNot(userRequestDTO.getEmail() , id)) {
+            throw new ResourceAlreadyExistsException(
+                    ResponseWrapper.getMessage("error.user.email_exists")
+            );
+        }
         userMapper.updateUserFromDTO(userRequestDTO, user);
         Users updatedUser = userRepository.save(user);
 

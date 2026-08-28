@@ -4,6 +4,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.ra.qltt.exception.ResponseWrapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.access.AccessDeniedHandler;
@@ -18,6 +19,6 @@ public class CustomAccessDenied implements AccessDeniedHandler {
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
         log.error("CustomAccessDenied {}" , accessDeniedException.getMessage());
         response.setStatus(HttpStatus.FORBIDDEN.value());
-        response.getWriter().write("Access Denied");
+        response.getWriter().write(ResponseWrapper.getMessage("error.auth.forbidden"));
     }
 }

@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.ra.qltt.model.dto.request.UserRequestDTO;
 import org.ra.qltt.exception.ResponseWrapper;
+import org.ra.qltt.model.dto.request.UserUpdateRequestDTO;
 import org.ra.qltt.model.dto.response.UserResponseDTO;
 import org.ra.qltt.service.UserService;
 import org.springframework.http.HttpStatus;
@@ -41,7 +42,7 @@ public class UsersController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateUser(@Valid @RequestBody UserRequestDTO userRequestDTO , @PathVariable Long id){
+    public ResponseEntity<?> updateUser(@Valid @RequestBody UserUpdateRequestDTO userRequestDTO , @PathVariable Long id){
         UserResponseDTO user = userService.updateUser(userRequestDTO,id);
         return ResponseEntity.ok(ResponseWrapper.success(user,"success.resource.update",HttpStatus.OK.value()));
     }

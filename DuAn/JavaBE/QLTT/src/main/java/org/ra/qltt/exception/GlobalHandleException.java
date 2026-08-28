@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -42,7 +44,7 @@ public class GlobalHandleException {
                 .body(
                         ResponseWrapper.error(
                                 errors,
-                                "Dữ liệu không hợp lệ",
+                                "error.validation.invalid",
                                 HttpStatus.BAD_REQUEST.value()
                         )
                 );
@@ -54,15 +56,14 @@ public class GlobalHandleException {
      */
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<ResponseWrapper<Void>>
-    handleNoResourceFoundException(
-    ) {
+    handleNoResourceFoundException() {
 
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
                 .body(
                         ResponseWrapper.error(
                                 null,
-                                "Không tìm thấy tài nguyên hoặc đường dẫn yêu cầu",
+                                "error.resource.not_found",
                                 HttpStatus.NOT_FOUND.value()
                         )
                 );
@@ -94,8 +95,8 @@ public class GlobalHandleException {
      */
     @ExceptionHandler(ResourceAlreadyExistsException.class)
     public ResponseEntity<ResponseWrapper<Void>>
-        handleResourceAlreadyExistsException(
-            ResourceNotFoundException e
+    handleResourceAlreadyExistsException(
+            ResourceAlreadyExistsException e
     ) {
 
         return ResponseEntity
@@ -118,16 +119,12 @@ public class GlobalHandleException {
             AccessDeniedException e
     ) {
 
-        String message = e.getMessage() != null
-                ? e.getMessage()
-                : "Bạn không có quyền thực hiện thao tác này";
-
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
                 .body(
                         ResponseWrapper.error(
                                 null,
-                                message,
+                                "error.auth.forbidden",
                                 HttpStatus.FORBIDDEN.value()
                         )
                 );
@@ -210,6 +207,27 @@ public class GlobalHandleException {
                 );
     }
 
+    /**
+     *     Fail login
+     */
+
+    @ExceptionHandler({
+            BadCredentialsException.class,
+            UsernameNotFoundException.class
+    })
+    public ResponseEntity<ResponseWrapper<Void>>
+    handleAuthenticationException() {
+
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(
+                        ResponseWrapper.error(
+                                null,
+                                "error.auth.invalid_credentials",
+                                HttpStatus.UNAUTHORIZED.value()
+                        )
+                );
+    }
 
     /**
      * Lỗi hệ thống không xác định
@@ -223,7 +241,7 @@ public class GlobalHandleException {
                 .body(
                         ResponseWrapper.error(
                                 null,
-                                "Đã xảy ra lỗi trong hệ thống",
+                                "error.system.internal",
                                 HttpStatus.INTERNAL_SERVER_ERROR.value()
                         )
                 );

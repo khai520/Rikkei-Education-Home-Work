@@ -18,7 +18,11 @@ public class UserDetailService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Users user = userRepository.getUsersByUsername(username);
-
+        if (user == null) {
+            throw new UsernameNotFoundException(
+                    "Username not found: " + username
+            );
+        }
         UserPrinciple userPrinciple = new UserPrinciple();
         userPrinciple.setUser(user);
         userPrinciple.setAuthorities(

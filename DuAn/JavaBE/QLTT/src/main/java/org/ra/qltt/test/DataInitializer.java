@@ -38,24 +38,6 @@ public class DataInitializer {
                 userRepository.save(admin);
             }
 
-            // ==================== STUDENT ====================
-            if (userRepository.findByUsername("student").isEmpty()) {
-
-                Users student = new Users();
-
-                student.setUsername("student");
-                student.setPasswordHash(
-                        passwordEncoder.encode("123456")
-                );
-                student.setEmail("student@gmail.com");
-                student.setFullName("Student");
-                student.setPhoneNumber("0123456788");
-                student.setActive(true);
-                student.setRole("STUDENT");
-
-                userRepository.save(student);
-            }
-
             // ==================== MENTOR ====================
             if (userRepository.findByUsername("mentor").isEmpty()) {
 
@@ -72,6 +54,25 @@ public class DataInitializer {
                 mentor.setRole("MENTOR");
 
                 userRepository.save(mentor);
+            }
+
+
+            // ==================== STUDENT ====================
+            if (userRepository.findByUsername("student").isEmpty()) {
+
+                Users student = new Users();
+
+                student.setUsername("student");
+                student.setPasswordHash(
+                        passwordEncoder.encode("123456")
+                );
+                student.setEmail("student@gmail.com");
+                student.setFullName("Student");
+                student.setPhoneNumber("0123456788");
+                student.setActive(true);
+                student.setRole("STUDENT");
+
+                userRepository.save(student);
             }
         };
     }
