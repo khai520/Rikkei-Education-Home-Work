@@ -12,4 +12,6 @@ public interface AssessmentResultsRepository extends JpaRepository<AssessmentRes
     List<AssessmentResults> findByAssignment_Student_Id(Long assignmentStudentId);
 
     boolean existsByAssignmentIdAndCriterionIdAndRoundId(Long assignmentId, Long criterionId, Long roundId);
+
+    boolean existsByAssignmentIdAndAssignment_Mentor_Id(Long assignmentId, Long assignmentMentorId);
 }

@@ -1,0 +1,252 @@
+======  User
+{
+  "username": "admin02",
+  "password": "123456",
+  "fullName": "Nguyễn Văn Admin",
+  "email": "admin02@gmail.com",
+  "phoneNumber": "0901000001",
+  "role": "ADMIN",
+  "active": true
+}
+{
+  "username": "student01",
+  "password": "123456",
+  "fullName": "Nguyễn Văn An",
+  "email": "student01@gmail.com",
+  "phoneNumber": "0901000002",
+  "role": "STUDENT",
+  "active": true
+}
+{
+  "username": "student02",
+  "password": "123456",
+  "fullName": "Trần Văn Bình",
+  "email": "student02@gmail.com",
+  "phoneNumber": "0901000003",
+  "role": "STUDENT",
+  "active": true
+}
+{
+  "username": "mentor01",
+  "password": "123456",
+  "fullName": "Nguyễn Văn Minh",
+  "email": "mentor01@gmail.com",
+  "phoneNumber": "0901000004",
+  "role": "MENTOR",
+  "active": true
+}
+{
+  "username": "mentor02",
+  "password": "123456",
+  "fullName": "Lê Thị Hoa",
+  "email": "mentor02@gmail.com",
+  "phoneNumber": "0901000005",
+  "role": "MENTOR",
+  "active": true
+}
+
+======== Students
+
+{
+  "userId": 4,
+  "studentCode": "SV001",
+  "major": "Công nghệ thông tin",
+  "className": "CNTT01",
+  "dob": "2004-05-15",
+  "address": "Hà Nội"
+}
+{
+  "userId": 5,
+  "studentCode": "SV002",
+  "major": "Công nghệ thông tin",
+  "className": "CNTT02",
+  "dob": "2004-08-20",
+  "address": "Hải Phòng"
+}
+
+== MENTORS
+
+{
+  "userId": 6,
+  "department": "Khoa Công nghệ thông tin",
+  "academicRank": "Thạc sĩ"
+}
+{
+  "userId": 7,
+  "department": "Khoa Công nghệ thông tin",
+  "academicRank": "Tiến sĩ"
+}
+
+== InternshipPhases
+
+{
+  "phaseName": "Thực tập học kỳ 1",
+  "startDate": "2026-09-01",
+  "endDate": "2026-12-31",
+  "description": "Giai đoạn thực tập học kỳ 1",
+  "active": true
+}
+{
+  "phaseName": "Thực tập học kỳ 2",
+  "startDate": "2027-01-05",
+  "endDate": "2027-04-30",
+  "description": "Giai đoạn thực tập học kỳ 2",
+  "active": true
+}
+
+== EvaluationCriteria
+
+{
+  "criteriaName": "Kiến thức chuyên môn",
+  "description": "Đánh giá kiến thức chuyên môn của sinh viên",
+  "maxScore": 10
+}
+{
+  "criteriaName": "Kỹ năng thực hành",
+  "description": "Đánh giá khả năng áp dụng kiến thức vào thực tế",
+  "maxScore": 10
+}
+{
+  "criteriaName": "Thái độ làm việc",
+  "description": "Đánh giá thái độ và tinh thần làm việc",
+  "maxScore": 10
+}
+{
+  "criteriaName": "Kỹ năng giao tiếp",
+  "description": "Đánh giá khả năng giao tiếp và làm việc nhóm",
+  "maxScore": 10
+}
+
+== AssessmentRounds
+
+{
+  "phaseId": 1,
+  "roundName": "Đánh giá giữa kỳ",
+  "startDate": "2026-10-15",
+  "endDate": "2026-10-30",
+  "description": "Đánh giá kết quả giữa kỳ thực tập",
+  "active": true,
+  "criteria": [
+    {
+      "criterionId": 1,
+      "weight": 0.25
+    },
+    {
+      "criterionId": 2,
+      "weight": 0.30
+    },
+    {
+      "criterionId": 3,
+      "weight": 0.25
+    },
+    {
+      "criterionId": 4,
+      "weight": 0.20
+    }
+  ]
+}
+{
+  "phaseId": 1,
+  "roundName": "Đánh giá cuối kỳ",
+  "startDate": "2026-12-15",
+  "endDate": "2026-12-30",
+  "description": "Đánh giá tổng kết kết quả thực tập",
+  "active": true,
+  "criteria": [
+    {
+      "criterionId": 1,
+      "weight": 0.30
+    },
+    {
+      "criterionId": 2,
+      "weight": 0.30
+    },
+    {
+      "criterionId": 3,
+      "weight": 0.20
+    },
+    {
+      "criterionId": 4,
+      "weight": 0.20
+    }
+  ]
+}
+
+== RoundCriteria
+
+{
+  "assessmentId": 1,
+  "roundId": 1,
+  "criterionId": 1,
+  "weight": 0.25
+}
+{
+  "assessmentId": 1,
+  "roundId": 1,
+  "criterionId": 2,
+  "weight": 0.30
+}
+{
+  "assessmentId": 1,
+  "roundId": 1,
+  "criterionId": 3,
+  "weight": 0.25
+}
+{
+  "assessmentId": 1,
+  "roundId": 1,
+  "criterionId": 4,
+  "weight": 0.20
+}
+
+== InternshipAssignments
+
+{
+  "studentId": 4,
+  "mentorId": 6,
+  "phaseId": 1,
+  "assignedDate": "2026-09-01T08:30:00",
+  "status": "IN_PROGRESS"
+}
+{
+  "studentId": 5,
+  "mentorId": 6,
+  "phaseId": 1,
+  "assignedDate": "2026-09-02T09:00:00",
+  "status": "IN_PROGRESS"
+}
+{
+  "studentId": 4,
+  "mentorId": 7,
+  "phaseId": 2,
+  "assignedDate": "2026-09-03T10:00:00",
+  "status": "PENDING"
+}
+
+== AssessmentResults
+
+// MENTOR1
+{
+  "assignmentId": 1,
+  "roundId": 1,
+  "criterionId": 1,
+  "score": 8.5,
+  "evaluationDate": "2026-10-20T09:00:00",
+  "comment": "Sinh viên có kiến thức chuyên môn tốt."
+}
+{
+  "assignmentId": 1,
+  "roundId": 1,
+  "criterionId": 2,
+  "score": 9.0,
+  "evaluationDate": "2026-10-20T09:15:00",
+  "comment": "Khả năng thực hành tốt, hoàn thành đúng yêu cầu."
+}
+{
+  "assignmentId": 1,
+  "roundId": 1,
+  "criterionId": 3,
+  "score": 8.0,
+  "evaluationDate": "2026-10-20T09:30:00",
+  "comment": "Có thái độ làm việc nghiêm túc."
+}

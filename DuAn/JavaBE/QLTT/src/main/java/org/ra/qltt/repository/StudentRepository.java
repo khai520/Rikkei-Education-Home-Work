@@ -17,5 +17,6 @@ public interface StudentRepository extends JpaRepository<Students, Long> {
             @Param("mentorId") Long mentorId
     );
 
-    boolean findByStudentCode(String studentCode);
+
+    boolean existsByStudentCode(String studentCode);
 }

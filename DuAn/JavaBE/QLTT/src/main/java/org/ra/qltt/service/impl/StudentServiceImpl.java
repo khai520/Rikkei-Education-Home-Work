@@ -108,7 +108,7 @@ public class StudentServiceImpl implements StudentService {
 
         studentRequestDTO.setStudentCode(studentRequestDTO.getStudentCode().toUpperCase());
 
-        if(studentRepository.findByStudentCode(studentRequestDTO.getStudentCode())){
+        if(studentRepository.existsByStudentCode(studentRequestDTO.getStudentCode())){
             throw new ResourceAlreadyExistsException(
                     "Student Code này đã tồn tại"
             );

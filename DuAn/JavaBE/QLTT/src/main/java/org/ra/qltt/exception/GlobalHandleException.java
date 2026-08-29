@@ -50,9 +50,8 @@ public class GlobalHandleException {
                 );
     }
 
-
     /**
-     * Không tìm thấy URL / endpoint
+     * Không tìm thấy URL
      */
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<ResponseWrapper<Void>>
@@ -69,15 +68,12 @@ public class GlobalHandleException {
                 );
     }
 
-
     /**
-     * Không tìm thấy resource trong database
+     * Không tìm thấy resource
      */
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ResponseWrapper<Void>>
-    handleResourceNotFoundException(
-            ResourceNotFoundException e
-    ) {
+    handleResourceNotFoundException(ResourceNotFoundException e) {
 
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
@@ -91,13 +87,11 @@ public class GlobalHandleException {
     }
 
     /**
-     * UNIQUE
+     * Resource đã tồn tại
      */
     @ExceptionHandler(ResourceAlreadyExistsException.class)
     public ResponseEntity<ResponseWrapper<Void>>
-    handleResourceAlreadyExistsException(
-            ResourceAlreadyExistsException e
-    ) {
+    handleResourceAlreadyExistsException(ResourceAlreadyExistsException e) {
 
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
@@ -111,52 +105,43 @@ public class GlobalHandleException {
     }
 
     /**
-     * Không có quyền thực hiện
+     * Không có quyền
      */
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ResponseWrapper<Void>>
-    handleAccessDeniedException(
-    ) {
+    handleAccessDeniedException(AccessDeniedException e) {
 
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
                 .body(
                         ResponseWrapper.error(
                                 null,
-                                "error.auth.forbidden",
+                                e.getMessage(),
                                 HttpStatus.FORBIDDEN.value()
                         )
                 );
     }
 
-
     /**
-     * Lỗi nghiệp vụ / tham số không hợp lệ
+     * Lỗi nghiệp vụ
      */
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ResponseWrapper<Void>>
-    handleIllegalArgumentException(
-            IllegalArgumentException e
-    ) {
-
-        String message = e.getMessage() != null
-                ? e.getMessage()
-                : "Dữ liệu truyền vào không hợp lệ";
+    handleIllegalArgumentException(IllegalArgumentException e) {
 
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(
                         ResponseWrapper.error(
                                 null,
-                                message,
+                                e.getMessage(),
                                 HttpStatus.BAD_REQUEST.value()
                         )
                 );
     }
 
-
     /**
-     * Thiếu @RequestParam bắt buộc
+     * Thiếu RequestParam
      */
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<ResponseWrapper<Void>>
@@ -164,25 +149,20 @@ public class GlobalHandleException {
             MissingServletRequestParameterException e
     ) {
 
-        String message = String.format(
-                "Tham số '%s' là bắt buộc",
-                e.getParameterName()
-        );
-
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(
                         ResponseWrapper.error(
                                 null,
-                                message,
-                                HttpStatus.BAD_REQUEST.value()
+                                "error.request.parameter_missing",
+                                HttpStatus.BAD_REQUEST.value(),
+                                e.getParameterName()
                         )
                 );
     }
 
-
     /**
-     * RequestParam truyền sai kiểu dữ liệu
+     * RequestParam sai kiểu dữ liệu
      */
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ResponseWrapper<Void>>
@@ -190,26 +170,21 @@ public class GlobalHandleException {
             MethodArgumentTypeMismatchException e
     ) {
 
-        String message = String.format(
-                "Tham số '%s' không hợp lệ",
-                e.getName()
-        );
-
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(
                         ResponseWrapper.error(
                                 null,
-                                message,
-                                HttpStatus.BAD_REQUEST.value()
+                                "error.request.parameter_invalid",
+                                HttpStatus.BAD_REQUEST.value(),
+                                e.getName()
                         )
                 );
     }
 
     /**
-     *     Fail login
+     * Sai username/password
      */
-
     @ExceptionHandler({
             BadCredentialsException.class,
             UsernameNotFoundException.class
@@ -229,7 +204,7 @@ public class GlobalHandleException {
     }
 
     /**
-     * Lỗi hệ thống không xác định
+     * Lỗi hệ thống
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ResponseWrapper<Void>>

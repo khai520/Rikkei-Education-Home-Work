@@ -67,12 +67,13 @@ public class AssessmentResultsServiceImpl implements AssessmentResultsService {
 
         assert principal != null;
         Users user = principal.getUser();
+
         InternshipAssignments internshipAssignments = internshipAssignmentsRepository.findById(assessmentResultRequestDTO.getAssignmentId()).orElseThrow(() ->
                     new NoResultException(ResponseWrapper.getMessage("error.assessment_result.assignment_not_found"))
                 );
 
-        if (assessmentResultsRepository.findByAssignment_Mentor_Id(user.getId()) == null) {
-            throw new AccessDeniedException(ResponseWrapper.getMessage("error.assessment_result.mentor_denied"));
+        if (!internshipAssignmentsRepository.existsByIdAndMentorId(assessmentResultRequestDTO.getAssignmentId(), user.getId())) {
+            throw new AccessDeniedException("error.assessment_result.mentor_denied");
         }
 
         EvaluationCriteria evaluationCriteria = evaluationCriteriaRepository.findById(assessmentResultRequestDTO.getCriterionId()).orElseThrow(() ->
