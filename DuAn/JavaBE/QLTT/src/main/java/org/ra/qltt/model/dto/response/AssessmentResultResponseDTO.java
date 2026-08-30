@@ -1,7 +1,6 @@
 package org.ra.qltt.model.dto.response;
 
 import lombok.Data;
-import org.ra.qltt.model.entity.Users;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -31,7 +30,7 @@ public class AssessmentResultResponseDTO {
 
     private String comments;
 
-    private Users evaluatedBy;
+    private UserResponseDTO evaluatedBy;
     private String evaluatedByName;
 
     private LocalDateTime evaluationDate;

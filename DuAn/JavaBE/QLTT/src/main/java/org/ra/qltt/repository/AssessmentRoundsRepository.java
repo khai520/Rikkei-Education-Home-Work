@@ -4,4 +4,5 @@ import org.ra.qltt.model.entity.AssessmentRounds;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface AssessmentRoundsRepository extends JpaRepository<AssessmentRounds, Long> {
+    boolean existsByRoundNameAndIdNot(String roundName, Long id);
 }

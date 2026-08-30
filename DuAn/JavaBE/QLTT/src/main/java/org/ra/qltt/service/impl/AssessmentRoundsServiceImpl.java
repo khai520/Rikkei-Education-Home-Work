@@ -4,7 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.ra.qltt.exception.ResourceNotFoundException;
 import org.ra.qltt.exception.ResponseWrapper;
 import org.ra.qltt.model.dto.request.AssessmentRoundRequestDTO;
-import org.ra.qltt.model.dto.request.RoundCriterionRequestDTO;
+import org.ra.qltt.model.dto.request.AssessmentRoundUpdateRequestDTO;
+import org.ra.qltt.model.dto.request.RoundCriterionRoundRequestDTO;
 import org.ra.qltt.model.dto.response.AssessmentRoundResponseDTO;
 import org.ra.qltt.model.entity.AssessmentRounds;
 import org.ra.qltt.model.entity.EvaluationCriteria;
@@ -51,103 +52,71 @@ public class AssessmentRoundsServiceImpl implements AssessmentRoundsService {
     @Override
     @Transactional
     public AssessmentRoundResponseDTO createAR(
-            AssessmentRoundRequestDTO assessmentRoundRequestDTO
+            AssessmentRoundRequestDTO request
     ) {
 
         InternshipPhases phase =
                 internshipPhasesRepository
-                        .findById(assessmentRoundRequestDTO.getPhaseId())
+                        .findById(request.getPhaseId())
                         .orElseThrow(() ->
                                 new ResourceNotFoundException(
-                                        "Không tìm thấy giai đoạn thực tập với ID: "
-                                                + assessmentRoundRequestDTO.getPhaseId()
+                                        "error.internship_phase.not_found"
                                 )
                         );
 
-
         Set<Long> criterionIds = new HashSet<>();
 
-        for (RoundCriterionRequestDTO criterionRequest
-                : assessmentRoundRequestDTO.getCriteria()) {
-
-            if (!criterionIds.add(
-                    criterionRequest.getCriterionId()
-            )) {
-
+        for (RoundCriterionRoundRequestDTO criterionRequest : request.getCriteria()) {
+            if (!criterionIds.add(criterionRequest.getCriterionId())) {
                 throw new IllegalArgumentException(
-                        "Tiêu chí ID "
-                                + criterionRequest.getCriterionId()
-                                + " bị trùng"
+                        "error.round_criteria.duplicate"
                 );
             }
         }
 
-
         BigDecimal totalWeight =
-                assessmentRoundRequestDTO
-                        .getCriteria()
+                request.getCriteria()
                         .stream()
-                        .map(RoundCriterionRequestDTO::getWeight)
+                        .map(RoundCriterionRoundRequestDTO::getWeight)
                         .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         if (totalWeight.compareTo(BigDecimal.ONE) != 0) {
-
             throw new IllegalArgumentException(
-                    "Tổng trọng số của các tiêu chí phải bằng 1.0"
+                    "error.round_criteria.invalid_weight"
             );
         }
 
-
         AssessmentRounds round =
-                assessmentRoundMapper
-                        .requestToRound(
-                                assessmentRoundRequestDTO
-                        );
+                assessmentRoundMapper.requestToRound(request);
 
         round.setPhases(phase);
 
+        List<RoundCriteria> roundCriteriaList = new ArrayList<>();
 
-        List<RoundCriteria> roundCriteriaList =
-                new ArrayList<>();
-
-        for (RoundCriterionRequestDTO criterionRequest
-                : assessmentRoundRequestDTO.getCriteria()) {
+        for (RoundCriterionRoundRequestDTO criterionRequest : request.getCriteria()) {
 
             EvaluationCriteria criterion =
                     evaluationCriteriaRepository
-                            .findById(
-                                    criterionRequest.getCriterionId()
-                            )
+                            .findById(criterionRequest.getCriterionId())
                             .orElseThrow(() ->
                                     new ResourceNotFoundException(
-                                            "Không tìm thấy tiêu chí với ID: "
-                                                    + criterionRequest.getCriterionId()
+                                            "error.evaluation_criteria.not_found"
                                     )
                             );
 
-            RoundCriteria roundCriteria =
-                    new RoundCriteria();
+            RoundCriteria roundCriteria = new RoundCriteria();
 
             roundCriteria.setRound(round);
             roundCriteria.setCriterion(criterion);
-            roundCriteria.setWeight(
-                    criterionRequest.getWeight()
-            );
+            roundCriteria.setWeight(criterionRequest.getWeight());
 
             roundCriteriaList.add(roundCriteria);
         }
 
-
         round.setRoundCriteria(roundCriteriaList);
-
-
-
 
         AssessmentRounds savedRound =
                 assessmentRoundsRepository.save(round);
-
-
-
 
         return assessmentRoundMapper
                 .roundToResponseDTO(savedRound);
@@ -156,88 +125,20 @@ public class AssessmentRoundsServiceImpl implements AssessmentRoundsService {
     @Override
     @Transactional
     public AssessmentRoundResponseDTO updateAR(
-            AssessmentRoundRequestDTO request,
+            AssessmentRoundUpdateRequestDTO request,
             Long id
     ) {
-
-
         AssessmentRounds assessmentRound =
                 assessmentRoundsRepository.findById(id)
                         .orElseThrow(() ->
                             new ResourceNotFoundException(ResponseWrapper.getMessage(
                                     "error.assessment_round.not_found"))
                         );
-
-
-        InternshipPhases phase =
-                internshipPhasesRepository.findById(request.getPhaseId())
-                        .orElseThrow(() ->
-                                new ResourceNotFoundException(
-                                        "Không tìm thấy giai đoạn thực tập với ID: "
-                                                + request.getPhaseId()
-                                )
-                        );
-        Set<Long> criterionIds = new HashSet<>();
-
-        for (RoundCriterionRequestDTO criterionRequest
-                : request.getCriteria()) {
-
-            if (!criterionIds.add(criterionRequest.getCriterionId())) {
-
-                throw new IllegalArgumentException(
-                        "Tiêu chí ID "
-                                + criterionRequest.getCriterionId()
-                                + " bị trùng"
-                );
-            }
+        if(assessmentRoundsRepository.existsByRoundNameAndIdNot(request.getRoundName(), id)) {
+            throw new ResourceNotFoundException(ResponseWrapper.getMessage("error.assessment_round.already_exists"));
         }
-
-        BigDecimal totalWeight =
-                request.getCriteria()
-                        .stream()
-                        .map(RoundCriterionRequestDTO::getWeight)
-                        .reduce(
-                                BigDecimal.ZERO,
-                                BigDecimal::add
-                        );
-
-        if (totalWeight.compareTo(BigDecimal.ONE) != 0) {
-
-            throw new IllegalArgumentException(
-                    "Tổng trọng số của các tiêu chí phải bằng 1.0"
-            );
-        }
-
-        assessmentRound.setPhases(phase);
-        assessmentRound.setRoundName(request.getRoundName());
-        assessmentRound.setStartDate(request.getStartDate());
-        assessmentRound.setEndDate(request.getEndDate());
-        assessmentRound.setDescription(request.getDescription());
-        assessmentRound.setActive(request.isActive());
-
-        assessmentRound.getRoundCriteria().clear();
-
-        for (RoundCriterionRequestDTO criterionRequest
-                : request.getCriteria()) {
-
-            EvaluationCriteria criterion =
-                    evaluationCriteriaRepository
-                            .findById(criterionRequest.getCriterionId())
-                            .orElseThrow(() ->
-                                    new ResourceNotFoundException(
-                                            "Không tìm thấy tiêu chí với ID: "
-                                                    + criterionRequest.getCriterionId()
-                                    )
-                            );
-
-            RoundCriteria roundCriteria = new RoundCriteria();
-
-            roundCriteria.setRound(assessmentRound);
-            roundCriteria.setCriterion(criterion);
-            roundCriteria.setWeight(criterionRequest.getWeight());
-
-            assessmentRound.getRoundCriteria().add(roundCriteria);
-        }
+        assessmentRoundMapper.updateRound(request , assessmentRound);
+        assessmentRoundsRepository.save(assessmentRound);
 
         return assessmentRoundMapper.roundToResponseDTO(assessmentRound);
     }

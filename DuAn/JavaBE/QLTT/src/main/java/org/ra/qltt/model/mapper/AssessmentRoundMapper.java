@@ -4,6 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.ra.qltt.model.dto.request.AssessmentRoundRequestDTO;
+import org.ra.qltt.model.dto.request.AssessmentRoundUpdateRequestDTO;
 import org.ra.qltt.model.dto.response.AssessmentRoundResponseDTO;
 import org.ra.qltt.model.entity.AssessmentRounds;
 
@@ -47,7 +48,7 @@ public interface AssessmentRoundMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     void updateRound(
-            AssessmentRoundRequestDTO request,
+            AssessmentRoundUpdateRequestDTO request,
             @MappingTarget AssessmentRounds round
     );
 

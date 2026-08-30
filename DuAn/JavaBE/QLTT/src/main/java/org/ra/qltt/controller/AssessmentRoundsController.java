@@ -3,6 +3,7 @@ package org.ra.qltt.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.ra.qltt.model.dto.request.AssessmentRoundRequestDTO;
+import org.ra.qltt.model.dto.request.AssessmentRoundUpdateRequestDTO;
 import org.ra.qltt.model.dto.response.AssessmentRoundResponseDTO;
 import org.ra.qltt.exception.ResponseWrapper;
 import org.ra.qltt.service.AssessmentRoundsService;
@@ -41,7 +42,7 @@ public class AssessmentRoundsController {
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<?> updateAR(@Valid @RequestBody AssessmentRoundRequestDTO assessmentRoundRequestDTO, @PathVariable Long id){
+    public ResponseEntity<?> updateAR(@Valid @RequestBody AssessmentRoundUpdateRequestDTO assessmentRoundRequestDTO, @PathVariable Long id){
         AssessmentRoundResponseDTO assessmentRoundResponseDTO = assessmentRoundsService.updateAR(assessmentRoundRequestDTO , id);
         return ResponseEntity.ok(ResponseWrapper.success(assessmentRoundResponseDTO,"success.resource.update",HttpStatus.OK.value()));
     }

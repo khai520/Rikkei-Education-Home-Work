@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 
 public interface RoundCriteriaRepository extends JpaRepository<RoundCriteria, Long> {
@@ -20,4 +21,6 @@ public interface RoundCriteriaRepository extends JpaRepository<RoundCriteria, Lo
     WHERE rc.round.id = :roundId
 """)
     BigDecimal sumWeightByRoundId(@Param("roundId") Long roundId);
+
+    List<RoundCriteria> findByRoundId(Long roundId);
 }

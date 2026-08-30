@@ -5,6 +5,7 @@ import org.ra.qltt.exception.ResourceNotFoundException;
 import org.ra.qltt.exception.ResponseWrapper;
 import org.ra.qltt.model.dto.enums.UserRole;
 import org.ra.qltt.model.dto.request.MentorRequestDTO;
+import org.ra.qltt.model.dto.request.MentorUpdateRequestDTO;
 import org.ra.qltt.model.dto.response.MentorResponseDTO;
 import org.ra.qltt.model.entity.Mentors;
 import org.ra.qltt.model.entity.Users;
@@ -89,7 +90,7 @@ public class MentorServiceImpl implements MentorService {
     }
 
     @Override
-    public MentorResponseDTO updateMentor(MentorRequestDTO mentorRequestDTO , Long id) {
+    public MentorResponseDTO updateMentor(MentorUpdateRequestDTO mentorRequestDTO , Long id) {
         Authentication authentication =
                 SecurityContextHolder.getContext().getAuthentication();
 
@@ -119,13 +120,6 @@ public class MentorServiceImpl implements MentorService {
             );
         }
 
-        if (mentorRequestDTO.getUserId() != null
-                && !mentorRequestDTO.getUserId().equals(mentors.getId())) {
-
-            throw new IllegalArgumentException(
-                    "Không được thay đổi người dùng liên kết với giáo viên"
-            );
-        }
 
         mentorMapper.updateMentorFromDTO(mentorRequestDTO, mentors);
 

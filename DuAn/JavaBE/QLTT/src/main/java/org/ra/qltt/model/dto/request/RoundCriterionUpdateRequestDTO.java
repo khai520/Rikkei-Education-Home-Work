@@ -8,13 +8,7 @@ import lombok.Data;
 import java.math.BigDecimal;
 
 @Data
-public class RoundCriterionRequestDTO {
-
-    @NotNull
-    private Long roundId;
-
-    @NotNull
-    private Long criterionId;
+public class RoundCriterionUpdateRequestDTO {
 
     @NotNull
     @DecimalMin(value = "0.0", inclusive = false)

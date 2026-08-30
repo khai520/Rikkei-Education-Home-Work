@@ -1,23 +1,14 @@
 package org.ra.qltt.model.dto.request;
 
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
-import org.ra.qltt.validation.ValidDateRange;
 
 import java.time.LocalDate;
-import java.util.List;
 
-@ValidDateRange(startDate = "startDate" , endDate = "endDate")
 @Data
-public class AssessmentRoundRequestDTO {
-
-    @NotNull(message = "Phase ID không được để trống")
-    private Long phaseId;
-
+public class AssessmentRoundUpdateRequestDTO {
     @NotBlank(message = "Tên đợt đánh giá không được để trống")
     @Size(max = 100, message = "Tên đợt đánh giá không được vượt quá 100 ký tự")
     private String roundName;
@@ -32,8 +23,4 @@ public class AssessmentRoundRequestDTO {
     private String description;
 
     private boolean active;
-
-    @NotEmpty(message = "Phải có ít nhất một tiêu chí đánh giá")
-    @Valid
-    private List<RoundCriterionRoundRequestDTO> criteria;
 }

@@ -3,6 +3,7 @@ package org.ra.qltt.controller;
 import lombok.RequiredArgsConstructor;
 import org.ra.qltt.model.dto.request.RoundCriterionRequestDTO;
 import org.ra.qltt.exception.ResponseWrapper;
+import org.ra.qltt.model.dto.request.RoundCriterionUpdateRequestDTO;
 import org.ra.qltt.model.dto.response.RoundCriterionResponseDTO;
 import org.ra.qltt.service.RoundCriteriaService;
 import org.springframework.http.HttpStatus;
@@ -37,6 +38,9 @@ public class RoundCriteriaController {
         if(dto.getRoundId().equals(round)){
             find = roundCriteriaService.getRCById(round);
         }
+        else {
+            find = null;
+        }
 
         return ResponseEntity.ok(
                 ResponseWrapper.success(
@@ -54,7 +58,7 @@ public class RoundCriteriaController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateRC(@PathVariable Long id, @RequestBody RoundCriterionRequestDTO roundCriterionRequestDTO){
+    public ResponseEntity<?> updateRC(@PathVariable Long id, @RequestBody RoundCriterionUpdateRequestDTO roundCriterionRequestDTO){
         RoundCriterionResponseDTO  roundCriterionResponseDTO = roundCriteriaService.updateRC(id, roundCriterionRequestDTO);
         return ResponseEntity.ok(ResponseWrapper.success(roundCriterionResponseDTO,"success.resource.update",HttpStatus.OK.value()));
     }

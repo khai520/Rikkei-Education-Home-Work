@@ -113,8 +113,8 @@ public class AssessmentResultsServiceImpl implements AssessmentResultsService {
         AssessmentResults assessmentResults = assessmentResultsRepository.findById(id).orElseThrow(() ->
                     new NoResultException(ResponseWrapper.getMessage("error.assessment_result.not_found"))
                 );
-        if (!assessmentResults.getEvaluatedBy().equals(user)) {
-            throw new AccessDeniedException(ResponseWrapper.getMessage("error.assessment_result.mentor_denied"));
+        if (!internshipAssignmentsRepository.existsByIdAndMentorId(assessmentResults.getAssignment().getId(), user.getId())) {
+            throw new AccessDeniedException("error.assessment_result.mentor_denied");
         }
         assessmentResults.setScore(score);
         AssessmentResults updateAR = assessmentResultsRepository.save(assessmentResults);

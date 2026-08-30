@@ -3,6 +3,7 @@ package org.ra.qltt.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.ra.qltt.model.dto.request.MentorRequestDTO;
+import org.ra.qltt.model.dto.request.MentorUpdateRequestDTO;
 import org.ra.qltt.model.dto.response.MentorResponseDTO;
 import org.ra.qltt.exception.ResponseWrapper;
 import org.ra.qltt.service.MentorService;
@@ -37,7 +38,7 @@ public class MentorController {
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<?> updateMentor(@PathVariable Long id, @Valid @RequestBody MentorRequestDTO mentorRequestDTO) {
+    public ResponseEntity<?> updateMentor(@PathVariable Long id, @Valid @RequestBody MentorUpdateRequestDTO mentorRequestDTO) {
         MentorResponseDTO responseDTO = mentorService.updateMentor(mentorRequestDTO, id);
         return ResponseEntity.ok(
                 ResponseWrapper.success(

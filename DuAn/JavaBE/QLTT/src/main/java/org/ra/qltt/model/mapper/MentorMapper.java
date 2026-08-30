@@ -4,6 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.ra.qltt.model.dto.request.MentorRequestDTO;
+import org.ra.qltt.model.dto.request.MentorUpdateRequestDTO;
 import org.ra.qltt.model.dto.response.MentorResponseDTO;
 import org.ra.qltt.model.entity.Mentors;
 
@@ -40,7 +41,7 @@ public interface MentorMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     void updateMentorFromDTO(
-            MentorRequestDTO request,
+            MentorUpdateRequestDTO request,
             @MappingTarget Mentors mentor
     );
 }

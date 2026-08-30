@@ -34,7 +34,7 @@ public class AssessmentResultsController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateScore(@PathVariable Long id, BigDecimal score) {
+    public ResponseEntity<?> updateScore(@PathVariable Long id, @RequestBody BigDecimal score) {
         AssessmentResultResponseDTO assessmentResultResponseDTO = assessmentResultsService.updateAR(id, score);
         return ResponseEntity.ok(ResponseWrapper.success(assessmentResultResponseDTO, "success.resource.update" , HttpStatus.OK.value()));
     }

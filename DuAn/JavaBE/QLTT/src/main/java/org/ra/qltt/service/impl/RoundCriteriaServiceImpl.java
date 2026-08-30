@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.ra.qltt.exception.ResourceNotFoundException;
 import org.ra.qltt.exception.ResponseWrapper;
 import org.ra.qltt.model.dto.request.RoundCriterionRequestDTO;
+import org.ra.qltt.model.dto.request.RoundCriterionUpdateRequestDTO;
 import org.ra.qltt.model.dto.response.RoundCriterionResponseDTO;
 import org.ra.qltt.model.entity.AssessmentRounds;
 import org.ra.qltt.model.entity.EvaluationCriteria;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 @Service
@@ -47,11 +49,11 @@ public class RoundCriteriaServiceImpl implements RoundCriteriaService {
     public RoundCriterionResponseDTO createRC(RoundCriterionRequestDTO rc) {
 
         AssessmentRounds assessmentRounds =
-                assessmentRoundsRepository.findById(rc.getAssessmentId())
+                assessmentRoundsRepository.findById(rc.getRoundId())
                         .orElseThrow(() ->
                                 new ResourceNotFoundException(
                                         "Không tìm thấy đợt đánh giá với ID: "
-                                                + rc.getAssessmentId()
+                                                + rc.getRoundId()
                                 )
                         );
 
@@ -66,14 +68,14 @@ public class RoundCriteriaServiceImpl implements RoundCriteriaService {
 
         if (roundCriteriaRepository.findFirstByCriterion_IdAndRound_Id(
                 rc.getCriterionId(),
-                rc.getAssessmentId()
+                rc.getRoundId()
         ) != null) {
 
             throw new IllegalArgumentException(
                     "Tiêu chí ID "
                             + rc.getCriterionId()
                             + " đã tồn tại trong đợt đánh giá ID "
-                            + rc.getAssessmentId()
+                            + rc.getRoundId()
             );
         }
 
@@ -87,7 +89,7 @@ public class RoundCriteriaServiceImpl implements RoundCriteriaService {
 
         BigDecimal currentWeight =
                 roundCriteriaRepository.sumWeightByRoundId(
-                        rc.getAssessmentId()
+                        rc.getRoundId()
                 );
 
         if (currentWeight == null) {
@@ -119,7 +121,7 @@ public class RoundCriteriaServiceImpl implements RoundCriteriaService {
     @Transactional
     public RoundCriterionResponseDTO updateRC(
             Long id,
-            RoundCriterionRequestDTO rc
+            RoundCriterionUpdateRequestDTO rc
     ) {
 
         RoundCriteria roundCriteria =
@@ -128,49 +130,9 @@ public class RoundCriteriaServiceImpl implements RoundCriteriaService {
                             new ResourceNotFoundException(ResponseWrapper.getMessage("error.round_criteria.not_found"))
                         );
 
-        AssessmentRounds assessmentRounds =
-                assessmentRoundsRepository.findById(
-                                rc.getAssessmentId()
-                        )
-                        .orElseThrow(() ->
-                                new ResourceNotFoundException(
-                                        "Không tìm thấy đợt đánh giá với ID: "
-                                                + rc.getAssessmentId()
-                                )
-                        );
-
-        EvaluationCriteria evaluationCriteria =
-                evaluationCriteriaRepository.findById(
-                                rc.getCriterionId()
-                        )
-                        .orElseThrow(() ->
-                                new ResourceNotFoundException(
-                                        "Không tìm thấy tiêu chí với ID: "
-                                                + rc.getCriterionId()
-                                )
-                        );
-
-        RoundCriteria existing =
-                roundCriteriaRepository
-                        .findFirstByCriterion_IdAndRound_Id(
-                                rc.getCriterionId(),
-                                rc.getAssessmentId()
-                        );
-
-        if (existing != null &&
-                !existing.getId().equals(id)) {
-
-            throw new IllegalArgumentException(
-                    "Tiêu chí ID "
-                            + rc.getCriterionId()
-                            + " đã tồn tại trong đợt đánh giá ID "
-                            + rc.getAssessmentId()
-            );
-        }
-
         BigDecimal currentTotal =
                 roundCriteriaRepository.sumWeightByRoundId(
-                        rc.getAssessmentId()
+                        id
                 );
 
         if (currentTotal == null) {
@@ -188,10 +150,6 @@ public class RoundCriteriaServiceImpl implements RoundCriteriaService {
                     "Tổng trọng số không được vượt quá 1.00"
             );
         }
-
-
-        roundCriteria.setRound(assessmentRounds);
-        roundCriteria.setCriterion(evaluationCriteria);
         roundCriteria.setWeight(rc.getWeight());
 
         RoundCriteria saved =
@@ -205,12 +163,51 @@ public class RoundCriteriaServiceImpl implements RoundCriteriaService {
     @Transactional
     public void deleteRC(Long id) {
 
+        // 1. Tìm RoundCriteria cần xóa
         RoundCriteria roundCriteria =
                 roundCriteriaRepository.findById(id)
                         .orElseThrow(() ->
-                            new ResourceNotFoundException(ResponseWrapper.getMessage("error.round_criteria.not_found"))
+                                new ResourceNotFoundException(
+                                        ResponseWrapper.getMessage(
+                                                "error.round_criteria.not_found"
+                                        )
+                                )
                         );
 
+        // 2. Lấy round mà RoundCriteria này thuộc về
+        AssessmentRounds round = roundCriteria.getRound();
+
+        // 3. Lấy tất cả RoundCriteria của round đó
+        List<RoundCriteria> remainingCriteria =
+                roundCriteriaRepository.findByRoundId(round.getId());
+
+        // 4. Loại bỏ criteria đang chuẩn bị xóa
+        remainingCriteria.removeIf(
+                rc -> rc.getId().equals(id)
+        );
+
+        // 5. Xóa RoundCriteria
         roundCriteriaRepository.delete(roundCriteria);
+
+        // 6. Nếu không còn criteria nào thì kết thúc
+        if (remainingCriteria.isEmpty()) {
+            return;
+        }
+
+        // 7. Chia đều trọng số cho các criteria còn lại
+        BigDecimal equalWeight =
+                BigDecimal.ONE.divide(
+                        BigDecimal.valueOf(remainingCriteria.size()),
+                        10,
+                        RoundingMode.HALF_UP
+                );
+
+        // 8. Gán trọng số mới
+        for (RoundCriteria rc : remainingCriteria) {
+            rc.setWeight(equalWeight);
+        }
+
+        // 9. Lưu lại
+        roundCriteriaRepository.saveAll(remainingCriteria);
     }
 }
