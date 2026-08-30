@@ -162,8 +162,7 @@ public class RoundCriteriaServiceImpl implements RoundCriteriaService {
     @Override
     @Transactional
     public void deleteRC(Long id) {
-
-        // 1. Tìm RoundCriteria cần xóa
+        
         RoundCriteria roundCriteria =
                 roundCriteriaRepository.findById(id)
                         .orElseThrow(() ->
@@ -174,27 +173,21 @@ public class RoundCriteriaServiceImpl implements RoundCriteriaService {
                                 )
                         );
 
-        // 2. Lấy round mà RoundCriteria này thuộc về
         AssessmentRounds round = roundCriteria.getRound();
 
-        // 3. Lấy tất cả RoundCriteria của round đó
         List<RoundCriteria> remainingCriteria =
                 roundCriteriaRepository.findByRoundId(round.getId());
 
-        // 4. Loại bỏ criteria đang chuẩn bị xóa
         remainingCriteria.removeIf(
                 rc -> rc.getId().equals(id)
         );
 
-        // 5. Xóa RoundCriteria
         roundCriteriaRepository.delete(roundCriteria);
 
-        // 6. Nếu không còn criteria nào thì kết thúc
         if (remainingCriteria.isEmpty()) {
             return;
         }
 
-        // 7. Chia đều trọng số cho các criteria còn lại
         BigDecimal equalWeight =
                 BigDecimal.ONE.divide(
                         BigDecimal.valueOf(remainingCriteria.size()),
@@ -202,12 +195,10 @@ public class RoundCriteriaServiceImpl implements RoundCriteriaService {
                         RoundingMode.HALF_UP
                 );
 
-        // 8. Gán trọng số mới
         for (RoundCriteria rc : remainingCriteria) {
             rc.setWeight(equalWeight);
         }
 
-        // 9. Lưu lại
         roundCriteriaRepository.saveAll(remainingCriteria);
     }
 }
