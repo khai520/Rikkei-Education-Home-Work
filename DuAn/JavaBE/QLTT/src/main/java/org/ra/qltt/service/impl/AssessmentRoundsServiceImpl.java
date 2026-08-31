@@ -54,7 +54,9 @@ public class AssessmentRoundsServiceImpl implements AssessmentRoundsService {
     public AssessmentRoundResponseDTO createAR(
             AssessmentRoundRequestDTO request
     ) {
-
+        if(assessmentRoundsRepository.existsByRoundName(request.getRoundName())) {
+            throw new ResourceNotFoundException(ResponseWrapper.getMessage("error.assessment_round.already_exists"));
+        }
         InternshipPhases phase =
                 internshipPhasesRepository
                         .findById(request.getPhaseId())
@@ -85,6 +87,7 @@ public class AssessmentRoundsServiceImpl implements AssessmentRoundsService {
                     "error.round_criteria.invalid_weight"
             );
         }
+
 
         AssessmentRounds round =
                 assessmentRoundMapper.requestToRound(request);
