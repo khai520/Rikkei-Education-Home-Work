@@ -1,9 +1,8 @@
 package org.ra.qltt.service.impl;
 
-
-import jakarta.persistence.NoResultException;
 import lombok.RequiredArgsConstructor;
 import org.ra.qltt.exception.ResourceAlreadyExistsException;
+import org.ra.qltt.exception.ResourceNotFoundException;
 import org.ra.qltt.exception.ResponseWrapper;
 import org.ra.qltt.model.dto.enums.UserRole;
 import org.ra.qltt.model.dto.request.AssessmentResultRequestDTO;
@@ -69,7 +68,7 @@ public class AssessmentResultsServiceImpl implements AssessmentResultsService {
         Users user = principal.getUser();
 
         InternshipAssignments internshipAssignments = internshipAssignmentsRepository.findById(assessmentResultRequestDTO.getAssignmentId()).orElseThrow(() ->
-                    new NoResultException(ResponseWrapper.getMessage("error.assessment_result.assignment_not_found"))
+                    new ResourceNotFoundException(ResponseWrapper.getMessage("error.assessment_result.assignment_not_found"))
                 );
 
         if (!internshipAssignmentsRepository.existsByIdAndMentorId(assessmentResultRequestDTO.getAssignmentId(), user.getId())) {
@@ -77,11 +76,11 @@ public class AssessmentResultsServiceImpl implements AssessmentResultsService {
         }
 
         EvaluationCriteria evaluationCriteria = evaluationCriteriaRepository.findById(assessmentResultRequestDTO.getCriterionId()).orElseThrow(() ->
-                    new NoResultException(ResponseWrapper.getMessage("error.assessment_result.criterion_not_found")         )
+                    new ResourceNotFoundException(ResponseWrapper.getMessage("error.assessment_result.criterion_not_found"))
                 );
 
         AssessmentRounds assessmentRounds = assessmentRoundsRepository.findById(assessmentResultRequestDTO.getRoundId()).orElseThrow(() ->
-                    new NoResultException(ResponseWrapper.getMessage("error.assessment_result.round_not_found"))
+                    new ResourceNotFoundException(ResponseWrapper.getMessage("error.assessment_result.round_not_found"))
                 );
 
         if (assessmentResultsRepository.existsByAssignmentIdAndCriterionIdAndRoundId(assessmentResultRequestDTO.getAssignmentId(), assessmentResultRequestDTO.getCriterionId(), assessmentResultRequestDTO.getRoundId())) {
@@ -111,7 +110,7 @@ public class AssessmentResultsServiceImpl implements AssessmentResultsService {
         Users user = principal.getUser();
 
         AssessmentResults assessmentResults = assessmentResultsRepository.findById(id).orElseThrow(() ->
-                    new NoResultException(ResponseWrapper.getMessage("error.assessment_result.not_found"))
+                    new ResourceNotFoundException(ResponseWrapper.getMessage("error.assessment_result.not_found"))
                 );
         if (!internshipAssignmentsRepository.existsByIdAndMentorId(assessmentResults.getAssignment().getId(), user.getId())) {
             throw new AccessDeniedException("error.assessment_result.mentor_denied");

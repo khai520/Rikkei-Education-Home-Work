@@ -3,6 +3,7 @@ package org.ra.qltt.exception;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -86,6 +87,20 @@ public class GlobalHandleException {
                 );
     }
 
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ResponseWrapper<Void>>
+    handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(
+                        ResponseWrapper.error(
+                                null,
+                                "Tham số định dạng sai",
+                                HttpStatus.NOT_FOUND.value()
+                        )
+                );
+    }
     /**
      * Resource đã tồn tại
      */

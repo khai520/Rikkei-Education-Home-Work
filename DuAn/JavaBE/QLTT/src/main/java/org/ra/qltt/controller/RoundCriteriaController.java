@@ -33,18 +33,13 @@ public class RoundCriteriaController {
 
         RoundCriterionResponseDTO dto =
                 roundCriteriaService.getRCById(id);
-
-        RoundCriterionResponseDTO find = new RoundCriterionResponseDTO();
-        if(dto.getRoundId().equals(round)){
-            find = roundCriteriaService.getRCById(round);
-        }
-        else {
-            find = null;
+        if(!dto.getRoundId().equals(round)){
+            dto = null;
         }
 
         return ResponseEntity.ok(
                 ResponseWrapper.success(
-                        find,
+                        dto,
                         "success.resource.find",
                         HttpStatus.OK.value()
                 )
